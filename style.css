@@ -1419,3 +1419,51 @@ body * {
         padding: 10px 14px;
     }
 }
+/* ===== ♡ 訪客同步打卡清單按鈕 ===== */
+
+#firebaseViewerSyncButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 18px 0;
+    padding: 12px 24px;
+
+    border: 1px solid #e9b8d4;
+    border-radius: 999px;
+
+    background: linear-gradient(135deg, #ffe5f1, #f5dafa);
+    color: #a35a8a;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(208, 137, 180, 0.15);
+
+    transition: all 0.25s ease;
+}
+
+#firebaseViewerSyncButton:hover {
+    background: linear-gradient(135deg, #fbd2e8, #e9cafa);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(208, 137, 180, 0.22);
+}
+
+#firebaseViewerSyncButton:active {
+    transform: scale(0.97);
+}
+
+#firebaseViewerSyncButton:disabled {
+    opacity: 0.6;
+    cursor: wait;
+    transform: none;
+}
+
+@media (max-width: 600px) {
+    #firebaseViewerSyncButton {
+        font-size: 13px;
+        padding: 11px 18px;
+    }
+}

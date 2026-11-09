@@ -195,6 +195,31 @@ await setDoc(doc(db, "publicChecklists", "main"), {
         }
     }
 }
+// ===== ♡ 同步公開旅遊標題 =====
+window.addEventListener("pinkPlannerTripChanged", async (event) => {
+    if (!isAdmin || auth.currentUser?.uid !== ADMIN_UID) {
+        return;
+    }
+
+    try {
+        const cloudRef = doc(db, "publicChecklists", "main");
+        const snapshot = await getDoc(cloudRef);
+
+        if (!snapshot.exists()) {
+            alert("找不到雲端打卡清單，標題尚未同步。");
+            return;
+        }
+
+        await setDoc(cloudRef, {
+            trip: event.detail
+        }, { merge: true });
+
+        alert("💜 旅遊標題、目的地與日期已同步給訪客！");
+    } catch (error) {
+        console.error("旅遊標題同步失敗：", error);
+        alert("標題同步失敗，請稍後再試。");
+    }
+});
 
 function scheduleSync() {
     // 暫時停用自動同步與手動同步

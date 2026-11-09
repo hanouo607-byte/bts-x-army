@@ -5,7 +5,7 @@ import { initializeApp, getApps, getApp }
 import { getAuth, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
-import { getFirestore, doc, onSnapshot }
+import { getFirestore, doc, getDoc, onSnapshot }
     from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -48,6 +48,14 @@ tripInfo.className = "trip-info";
 
 tripCard.append(tripLabel, tripTitle, tripDescription, tripInfo);
 viewer.appendChild(tripCard);
+
+// ===== ♡ 同步打卡清單 =====
+const viewerSyncButton = document.createElement("button");
+viewerSyncButton.id = "firebaseViewerSyncButton";
+viewerSyncButton.type = "button";
+viewerSyncButton.textContent = "☁️ 同步打卡清單";
+
+viewer.appendChild(viewerSyncButton);
 
 // ===== 每日行程 / 打卡清單分頁 =====
 
@@ -439,7 +447,38 @@ onSnapshot(
     }
 );
 
+// ===== ♡ 訪客手動同步打卡清單 =====
+viewerSyncButton.addEventListener("click", async () => {
+    viewerSyncButton.disabled = true;
+    viewerSyncButton.textContent = "☁️ 同步中...";
 
+    try {
+        const snapshot = await getDoc(
+            doc(db, "publicChecklists", "main")
+        );
+
+        if (!snapshot.exists()) {
+            alert("目前沒有雲端打卡清單");
+            return;
+        }
+
+        const data = snapshot.data();
+
+        renderSharedTrip({
+            trip: data.trip || null,
+            events: [],
+            checklists: data.checklists || []
+        });
+
+        alert("💜 標題與打卡清單已更新！");
+    } catch (error) {
+        console.error("同步失敗：", error);
+        alert("同步失敗，請稍後再試");
+    } finally {
+        viewerSyncButton.disabled = false;
+        viewerSyncButton.textContent = "☁️ 同步最新打卡清單";
+    }
+});
 // ===== 確認登入身分 =====
 
 onAuthStateChanged(auth, user => {

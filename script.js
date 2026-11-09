@@ -509,6 +509,10 @@ saveTripButton.addEventListener("click", function () {
 
     // 儲存到瀏覽器
     localStorage.setItem("pinkPlannerTrip", JSON.stringify(tripData));
+    // ♡ 通知 Firebase：旅遊標題與日期已修改
+window.dispatchEvent(new CustomEvent("pinkPlannerTripChanged", {
+    detail: tripData
+}));
 
     // 更新首頁旅遊名稱
     document.querySelector(".trip-card h1").textContent = name;
