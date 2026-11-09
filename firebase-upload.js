@@ -5,7 +5,7 @@ import { initializeApp, getApps, getApp }
 import { getAuth, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
 
-import { getFirestore, doc, setDoc }
+import { getFirestore, doc, getDoc, setDoc, runTransaction }
     from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -37,14 +37,66 @@ let lastUploaded = null;
 let pendingTimer = null;
 let syncing = false;
 
+// ===== 記錄目前裝置確認過的雲端版本 =====
+const CHECKLIST_VERSION_KEY = "pinkPlannerChecklistCloudVersion";
+
+function getKnownChecklistVersion() {
+    return localStorage.getItem(CHECKLIST_VERSION_KEY);
+}
+
+function saveKnownChecklistVersion(version) {
+    localStorage.setItem(CHECKLIST_VERSION_KEY, version);
+}
+
+// ===== 檢查雲端版本是否與本機記錄一致 =====
+function isChecklistVersionCurrent(cloudVersion) {
+    // ===== 產生每次同步專用的新版本 =====
+function createChecklistVersion() {
+    return crypto.randomUUID();
+}
+    const knownVersion = getKnownChecklistVersion();
+
+    // 尚未確認過雲端版本，不允許上傳
+    if (!knownVersion || !cloudVersion) {
+        return false;
+    }
+
+    return knownVersion === cloudVersion;
+}
+
 onAuthStateChanged(auth, user => {
     isAdmin = !!user && user.uid === ADMIN_UID;
-    uploadButton.style.display = isAdmin ? "inline-flex" : "none";
+    uploadButton.style.display = "none";
 
     // 暫時停止登入後自動同步，避免覆蓋雲端資料
         clearTimeout(pendingTimer);
 });
 
+// ===== 檢查雲端打卡清單 =====
+async function checkCloudChecklists() {
+    // ===== 比對本機與雲端打卡清單 =====
+function areChecklistsEqual(localChecklists, cloudChecklists) {
+    return JSON.stringify(localChecklists) ===
+           JSON.stringify(cloudChecklists);
+}
+    const cloudRef = doc(db, "publicChecklists", "main");
+    const snapshot = await getDoc(cloudRef);
+
+    if (!snapshot.exists()) {
+        throw new Error("找不到雲端打卡清單，已停止同步。");
+    }
+
+    const cloudData = snapshot.data();
+
+    if (!Array.isArray(cloudData.checklists)) {
+        throw new Error("雲端打卡清單格式異常，已停止同步。");
+    }
+
+    return {
+        checklists: cloudData.checklists,
+        updatedAt: cloudData.updatedAt || null
+    };
+}
 function readChecklists() {
     const raw = localStorage.getItem("pinkPlannerChecklists");
 
@@ -58,7 +110,37 @@ function readChecklists() {
 
     return data;
 }
+// ===== 使用 Firebase Transaction 安全同步打卡清單 =====
+async function uploadChecklistsSafely(trip, checklists) {
+    const cloudRef = doc(db, "publicChecklists", "main");
 
+    const newVersion = createChecklistVersion();
+
+    await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(cloudRef);
+
+        if (!snapshot.exists()) {
+            throw new Error("雲端清單不存在，已停止同步。");
+        }
+
+        const cloudData = snapshot.data();
+
+        if (!isChecklistVersionCurrent(cloudData.version)) {
+            throw new Error(
+                "雲端資料版本不同，可能已被其他裝置更新，已停止同步。"
+            );
+        }
+
+        transaction.update(cloudRef, {
+            trip: trip,
+            checklists: checklists,
+            version: newVersion,
+            updatedAt: new Date().toISOString()
+        });
+    });
+
+    saveKnownChecklistVersion(newVersion);
+}
 async function syncChecklists() {
     if (!isAdmin || syncing) return;
 

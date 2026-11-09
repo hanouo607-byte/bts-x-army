@@ -35,8 +35,7 @@ onAuthStateChanged(auth, user => {
     console.log("🔐 目前網站登入 UID：", user?.uid);
     console.log("🔐 Firebase 專案：", app.options.projectId);
 
-    privateButton.style.display =
-        user && user.uid === ADMIN_UID ? "inline-flex" : "none";
+    privateButton.style.display = "none";
 });
 
 privateButton.addEventListener("click", async () => {
@@ -179,6 +178,7 @@ downloadButton.addEventListener("click", async () => {
 
 
 const checklistImportButton = document.createElement("button");
+checklistImportButton.id = "firebaseChecklistImportButton";
 checklistImportButton.type = "button";
 checklistImportButton.textContent = "💜 匯入雲端打卡清單";
 checklistImportButton.style.display = "none";

@@ -1379,3 +1379,43 @@ body * {
     flex: 0 0 100%;
     margin: 5px 0 0 27px;
 }
+/* ===== ♡ Firebase 雲端按鈕粉嫩美化 ===== */
+
+#firebasePrivateDownloadButton,
+#firebaseChecklistImportButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 20px;
+    border-radius: 999px;
+    border: 1px solid #e9b8d4;
+    background: linear-gradient(135deg, #ffe5f1, #f5dafa);
+    color: #a35a8a;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(208, 137, 180, 0.12);
+    transition: all 0.25s ease;
+}
+
+#firebasePrivateDownloadButton:hover,
+#firebaseChecklistImportButton:hover {
+    background: linear-gradient(135deg, #fbd2e8, #e9cafa);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(208, 137, 180, 0.2);
+}
+
+#firebasePrivateDownloadButton:active,
+#firebaseChecklistImportButton:active {
+    transform: scale(0.97);
+}
+
+/* iPhone 小螢幕適配 */
+@media (max-width: 600px) {
+    #firebasePrivateDownloadButton,
+    #firebaseChecklistImportButton {
+        font-size: 12px;
+        padding: 10px 14px;
+    }
+}
