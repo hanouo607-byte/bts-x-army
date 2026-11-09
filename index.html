@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTS X ARMY ♡ 行程規劃</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <header class="header">
+            <div class="logo">♡ BTS X ARMY ♡</div>
+            <p>把每一天的美好都安排好</p>
+        </header>
+
+        <section class="trip-card">
+            <div class="trip-label">MY TRAVEL DIARY</div>
+            <h1>我的旅遊行程</h1>
+            <p>記錄與防彈美好的旅程 ♡</p>
+
+<div class="trip-info">
+    <span id="tripDateDisplay">📅 2026.11.19 - 11.22</span>
+    <span id="tripDestinationDisplay">📍 高雄</span>
+</div>
+
+<button id="editTripButton" class="edit-trip-button">
+    ✎ 編輯旅遊資料
+</button>
+
+        </section>
+
+        
+<!-- ===== PinkPlanner 主功能分頁 ===== -->
+<div class="main-tabs">
+    <button id="scheduleTab" class="main-tab active">
+        ♡ 每日行程
+    </button>
+
+    <button id="checklistTab" class="main-tab">
+        ♡ 打卡清單
+    </button>
+</div>
+
+
+<!-- ===== 打卡清單分頁內容 ===== -->
+<section id="checklistSection" class="checklist-section" style="display: none;">
+
+    <h2>♡ 我的打卡清單</h2>
+
+    <p>把想去的景點和拍照點收藏在這裡。</p>
+
+    <div id="checklistGroups"></div>
+
+    <button id="addChecklistButton" class="add-button">
+        ＋ 新增打卡清單
+    </button>
+
+</section>
+
+
+<!-- ===== 新增打卡清單視窗 ===== -->
+<div id="checklistModal" class="modal">
+    <div class="modal-content">
+
+        <h2>♡ 新增打卡清單</h2>
+
+        <label for="checklistName">景點或區域名稱</label>
+        <input
+            type="text"
+            id="checklistName"
+            placeholder="例如：駁二藝術特區"
+        >
+
+        <button type="button" id="saveChecklistButton">
+            ♡ 儲存清單
+        </button>
+
+        <button type="button" id="closeChecklistButton">
+            取消
+        </button>
+
+    </div>
+</div>
+
+
+<!-- ===== 新增打卡點視窗 ===== -->
+<div id="checklistItemModal" class="modal">
+    <div class="modal-content">
+
+        <h2>♡ 新增打卡點</h2>
+
+        <label for="checklistItemName">名稱</label>
+        <input type="text" id="checklistItemName"
+               placeholder="例如：蓬萊倉庫">
+
+        <label for="checklistItemLocation">位置</label>
+        <input type="text" id="checklistItemLocation"
+               placeholder="例如：高雄市鹽埕區">
+
+        <label for="checklistItemTransport">交通</label>
+        <input type="text" id="checklistItemTransport"
+               placeholder="例如：輕軌駁二蓬萊站">
+
+        <label for="checklistItemNote">備註</label>
+        <textarea id="checklistItemNote"
+                  placeholder="例如：想拍照的角度、注意事項"></textarea>
+
+        <button type="button" id="saveChecklistItemButton">
+            ♡ 儲存打卡點
+        </button>
+
+        <button type="button" id="closeChecklistItemButton">
+            取消
+        </button>
+
+    </div>
+</div>
+
+
+
+
+        <section class="schedule-section">
+
+            <div id="dateTabs"></div>
+
+            <div id="scheduleList">
+            <p class="empty-message">還沒有行程喔，新增一筆吧！ ♡</p>
+            </div>
+
+            <button class="add-button">＋ 新增行程</button>
+            <div id="addModal" class="modal">
+            <div class="modal-content">
+            <h2 id="modalTitle">♡ 新增我的行程</h2>
+
+            <label>日期</label>
+            <input type="date" id="eventDate">
+
+            <label>時間</label>
+            <input type="time" id="eventTime">
+
+            <label>行程名稱</label>
+            <input type="text" id="eventTitle" placeholder="今天要去哪裡呢？">
+
+            <label>地點</label>
+            <input type="text" id="eventPlace" placeholder="輸入地點">
+
+
+            <!-- ===== 交通資訊 ===== -->
+
+            <label>交通方式</label>
+            <select id="eventTransport">
+            <option value="">不需要交通資訊</option>
+            <option value="步行">🚶 步行</option>
+            <option value="捷運">🚇 捷運</option>
+            <option value="輕軌">🚈 輕軌</option>
+            <option value="火車">🚆 火車</option>
+            <option value="高鐵">🚄 高鐵</option>
+            <option value="公車">🚌 公車</option>
+            <option value="計程車">🚕 計程車</option>
+            <option value="其他">🚗 其他</option>
+        </select>
+
+        <label>出發站／地點</label>
+        <input type="text" id="transportFrom"
+        placeholder="例如：左營站">
+
+        <label>抵達站／地點</label>
+        <input type="text" id="transportTo"
+        placeholder="例如：巨蛋站">
+
+        <label>交通路線</label>
+        <input type="text" id="transportRoute"
+        placeholder="例如：高雄捷運紅線">
+
+            <label>備註</label>
+            <textarea id="eventNote" placeholder="記錄一些小事情 ♡"></textarea>
+
+            <button id="saveEvent">儲存行程</button>
+            <button id="closeModal">取消</button>
+        </div>
+    </div>
+        </section>
+
+
+<!-- ===== 編輯旅遊資料視窗 ===== -->
+
+<div id="tripModal" class="modal">
+    <div class="modal-content">
+
+        <h2>♡ 編輯旅遊資料</h2>
+
+        <label>旅遊名稱</label>
+        <input
+            type="text"
+            id="tripName"
+            placeholder="例如：高雄四天三夜 ♡"
+        >
+
+        <label>旅遊目的地</label>
+        <input
+            type="text"
+            id="tripDestination"
+            placeholder="例如：高雄"
+        >
+
+        <label>開始日期</label>
+        <input type="date" id="tripStartDate">
+
+        <label>結束日期</label>
+        <input type="date" id="tripEndDate">
+
+        <button id="saveTripButton">儲存旅遊資料</button>
+        <button id="closeTripButton">取消</button>
+
+    </div>
+</div>
+
+        <footer>
+            Made with ♡ by KaKa
+        </footer>
+
+    </div>
+
+</body>
+<script src="script.js"></script>
+</html>
