@@ -1,0 +1,1381 @@
+@font-face {
+    font-family: "Huninn";
+    src: url("./fonts/jf-openhuninn-2.1.ttf") format("truetype");
+    font-weight: 100 900;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 30px 16px;
+    font-family: "Huninn", sans-serif;
+    background: #FFF4F8;
+    color: #70566B;
+}
+
+.container {
+    max-width: 650px;
+    margin: auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: bold;
+    color: #D889B5;
+}
+
+.header p {
+    color: #A98AA5;
+}
+
+.trip-card {
+    background: linear-gradient(135deg, #F8DCEB, #EADFF5);
+    padding: 28px;
+    border-radius: 22px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 18px #E7C9DC55;
+}
+
+.trip-label {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: #A77C9B;
+}
+
+.trip-card h1 {
+    font-size: 26px;
+    color: #865F80;
+}
+
+.trip-card p {
+    color: #967B96;
+}
+
+.trip-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+    font-size: 14px;
+    color: #80617E;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.section-title h2 {
+    color: #C77FA8;
+}
+
+.section-title span {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #C69AB8;
+}
+
+.day-card {
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 5px 18px #E7C9DC44;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #F5E5EE;
+    color: #C77FA8;
+    font-weight: bold;
+}
+
+.schedule-item {
+    display: flex;
+    gap: 18px;
+    padding: 20px 0;
+    border-bottom: 1px solid #F8EDF2;
+}
+
+.time {
+    color: #D889B5;
+    font-weight: bold;
+    min-width: 55px;
+}
+
+.event h3 {
+    margin: 0 0 7px;
+    font-size: 16px;
+    color: #765F74;
+}
+
+.event p {
+    margin: 0;
+    font-size: 13px;
+    color: #AE9AAA;
+}
+
+.add-button {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    border: none;
+    border-radius: 15px;
+    background: #E9B6D1;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background: #D889B5;
+}
+
+footer {
+    text-align: center;
+    margin: 35px 0 15px;
+    color: #C69AB8;
+    font-size: 12px;
+}
+
+/* ===== 新增行程視窗 ===== */
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #70566B88;
+    z-index: 1000;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #FFF8FB;
+    width: 100%;
+    max-width: 420px;
+    padding: 25px;
+    border-radius: 22px;
+    box-shadow: 0 10px 35px #0002;
+    text-align: left;
+}
+
+.modal-content h2 {
+    text-align: center;
+    color: #D889B5;
+}
+
+.modal-content label {
+    display: block;
+    margin-top: 15px;
+    color: #98728F;
+    font-size: 14px;
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 7px;
+    border: 1px solid #EACADD;
+    border-radius: 10px;
+    background: white;
+    font-size: 15px;
+}
+
+.modal-content textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.modal-content button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #E9B6D1;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+/* ===== 行程顯示與刪除按鈕 ===== */
+
+.empty-message {
+    text-align: center;
+    color: #C69AB8;
+    padding: 30px 10px;
+}
+
+.event small {
+    display: block;
+    color: #C69AB8;
+    margin-bottom: 8px;
+}
+
+.event h3 {
+    margin-bottom: 10px;
+}
+
+.delete-button {
+    margin-top: 12px;
+    padding: 6px 15px;
+    border: none;
+    border-radius: 20px;
+    background: #F9E2EE;
+    color: #C77FA8;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* ===== 每日行程分類卡片 ===== */
+
+.day-group {
+    background: #fff8fb;
+    border: 1px solid #f5dce8;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.day-group-header {
+    color: #c76b91;
+    font-size: 16px;
+    font-weight: bold;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #f1d5e2;
+    letter-spacing: 1px;
+}
+
+.day-group .schedule-item {
+    margin-bottom: 12px;
+}
+
+.day-group .schedule-item:last-child {
+    margin-bottom: 0;
+}
+
+/* ===== PinkPlanner 日期分頁 ===== */
+
+#dateTabs {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 12px 4px 18px;
+    margin-bottom: 12px;
+}
+
+.date-tab {
+    flex: 0 0 auto;
+    min-width: 82px;
+    padding: 12px 16px;
+    border: 1px solid #f1d5e2;
+    border-radius: 14px;
+    background: #fff6fa;
+    color: #c76b91;
+    font-size: 14px;
+    line-height: 1.8;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.date-tab.active {
+    background: #e9b2cf;
+    border-color: #e9b2cf;
+    color: white;
+    box-shadow: 0 4px 10px rgba(199, 107, 145, 0.18);
+}
+
+.date-tab:hover {
+    background: #f5dce8;
+    color: #b85f86;
+}
+
+.date-tab.active:hover {
+    background: #e9b2cf;
+    color: white;
+}
+
+
+/* ===== 行程完成勾選框 ===== */
+
+.complete-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid #e9b2cf;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    position: relative;
+    margin: 4px 8px 0 0;
+}
+
+.complete-checkbox:checked {
+    background: #e9b2cf;
+    border-color: #e9b2cf;
+}
+
+.complete-checkbox:checked::after {
+    content: "✓";
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    position: absolute;
+    left: 3px;
+    top: -2px;
+}
+
+/* ===== 已完成行程樣式 ===== */
+
+.schedule-item.completed {
+    opacity: 0.55;
+}
+
+.schedule-item.completed .event h3 {
+    text-decoration: line-through;
+    color: #b9a1ad;
+}
+
+.schedule-item.completed .time {
+    color: #c9b4bf;
+}
+
+/* ===== 編輯按鈕 ===== */
+
+.edit-button {
+    background: #fbe5f0;
+    color: #b85f86;
+    border: 1px solid #f1cddd;
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    margin: 8px 8px 0 0;
+    transition: 0.2s;
+}
+
+.edit-button:hover {
+    background: #e9b2cf;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* ===== 刪除按鈕 ===== */
+
+.delete-button {
+    background: #fff0f0;
+    color: #cb777d;
+    border: 1px solid #f3d5d8;
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.delete-button:hover {
+    background: #f3c3c8;
+    color: white;
+}
+
+/* ===== 完成行程刪除線 ===== */
+
+.schedule-item.completed .event h3 {
+    text-decoration: line-through;
+    text-decoration-color: #c76b91;
+    text-decoration-thickness: 2px;
+    color: #b9a1ad;
+}
+
+/* ===== 已完成標籤 ===== */
+
+.schedule-item.completed .event::after {
+    content: "✓ 已完成 ♡";
+    display: block;
+    width: fit-content;
+    margin-top: 10px;
+    padding: 4px 10px;
+    background: #f9e6ef;
+    color: #bd7898;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+/* ===== 編輯、刪除按鈕縮小 ===== */
+
+.edit-button,
+.delete-button {
+    padding: 4px 9px;
+    font-size: 11px;
+    border-radius: 12px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+.edit-button {
+    margin-right: 5px;
+}
+
+/* ===== 交通資訊卡片 ===== */
+
+.transport-box {
+    background: #fff0f6;
+    border: 1px solid #f5dce8;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    max-width: 380px;
+}
+
+/* 交通方式與路線 */
+
+.transport-title {
+    color: #b85f86;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* 出發站 → 抵達站 */
+
+.transport-stations {
+    color: #806b77;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* 手機版自動調整 */
+
+@media (max-width: 600px) {
+    .transport-box {
+        max-width: 100%;
+        padding: 10px;
+    }
+}
+
+/* ===== 修正新增／編輯視窗滑動 ===== */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 20px;
+    align-items: safe center;
+    justify-content: center;
+}
+
+/* 視窗內容可以上下滑動 */
+
+.modal-content {
+    width: 100%;
+    max-width: 500px;
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    box-sizing: border-box;
+    overscroll-behavior: contain;
+}
+
+/* 手機版調整 */
+
+@media (max-width: 600px) {
+    .modal {
+        padding: 12px;
+    }
+
+    .modal-content {
+        max-height: calc(100vh - 24px);
+        max-height: calc(100dvh - 24px);
+    }
+}
+
+/* ===== 交通方式粉嫩下拉選單 ===== */
+
+#eventTransport {
+    appearance: none;
+    -webkit-appearance: none;
+
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+
+    background-color: #ffffff;
+    color: #806b77;
+
+    border: 1px solid #f1cddd;
+    border-radius: 12px;
+
+    padding: 15px 42px 15px 16px;
+    font-size: 16px;
+    font-family: inherit;
+
+    cursor: pointer;
+
+    /* 右側粉嫩下拉箭頭 */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c76b91' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* 點選時顯示粉嫩外框 */
+
+#eventTransport:focus {
+    outline: none;
+    border-color: #e9b2cf;
+    box-shadow: 0 0 0 3px rgba(233, 178, 207, 0.2);
+}
+
+/* 滑鼠移過去 */
+
+#eventTransport:hover {
+    border-color: #e9b2cf;
+}
+
+/* ===== PinkPlanner 粉嫩捲動條 ===== */
+
+/* Chrome、Edge、Safari */
+
+.modal-content::-webkit-scrollbar {
+    width: 7px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #fff5f9;
+    border-radius: 20px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #e9b2cf;
+    border-radius: 20px;
+    border: 1px solid #fff5f9;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #c76b91;
+}
+
+/* Firefox */
+
+@supports not selector(::-webkit-scrollbar) {
+    .modal-content {
+        scrollbar-width: thin;
+        scrollbar-color: #e9b2cf #fff5f9;
+    }
+}
+
+/* ===== 編輯旅遊資料按鈕 ===== */
+
+.edit-trip-button {
+    display: block;
+    width: fit-content;
+    margin: 15px 0 0 auto;
+    padding: 6px 12px;
+
+    background: #fff0f6;
+    color: #b85f86;
+
+    border: 1px solid #f1cddd;
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.edit-trip-button:hover {
+    background: #e9b2cf;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.edit-trip-button:active {
+    transform: translateY(0);
+}
+
+/* ===== DAY 日期分頁：小巧粉嫩版 ===== */
+
+#dateTabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 2px 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #e8b2cd #fff0f6;
+}
+
+.date-tab {
+    flex: 0 0 auto;
+    min-width: 65px;
+    width: 65px;
+    min-height: 0;
+    height: 62px;
+    padding: 7px 5px;
+
+    border-radius: 14px;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.date-tab.active {
+    box-shadow: 0 3px 8px rgba(210, 130, 170, 0.15);
+}
+
+/* ===== 粉嫩圓角捲動條 ===== */
+
+#dateTabs::-webkit-scrollbar {
+    height: 5px;
+}
+
+#dateTabs::-webkit-scrollbar-track {
+    background: #fff0f6;
+    border-radius: 20px;
+}
+
+#dateTabs::-webkit-scrollbar-thumb {
+    background: #e8b2cd;
+    border-radius: 20px;
+}
+
+#dateTabs::-webkit-scrollbar-thumb:hover {
+    background: #d990b5;
+}
+
+/* ===== 粉嫩行程時間軸 ===== */
+
+.schedule-item {
+    position: relative;
+    border-left: 2px solid #f0c8dc;
+    margin-left: 8px;
+    padding-left: 18px;
+}
+
+/* 時間軸上的小圓點 */
+.schedule-item::before {
+    content: "♡";
+    position: absolute;
+    left: -10px;
+    top: 21px;
+
+    width: 18px;
+    height: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f9dce9;
+    color: #c66d9a;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+
+    font-size: 11px;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+/* ===== 可愛圓形完成勾選框 ===== */
+
+.complete-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    flex-shrink: 0;
+
+    padding: 0;
+    margin: 0;
+
+    background: #ffffff;
+    border: 2px solid #e9a8c8;
+    border-radius: 50%;
+
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+/* 滑鼠移上去 */
+.complete-checkbox:hover {
+    background: #fff0f6;
+    border-color: #d889b2;
+    transform: scale(1.08);
+}
+
+/* 勾選完成 */
+.complete-checkbox:checked {
+    background: #e7a3c5;
+    border-color: #e7a3c5;
+}
+
+/* 白色勾勾 */
+.complete-checkbox:checked::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 鍵盤操作時的焦點提示 */
+.complete-checkbox:focus-visible {
+    outline: 2px solid #c878a4;
+    outline-offset: 3px;
+}
+
+/* ===== 時間軸內容排列優化 ===== */
+
+.schedule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+/* 完成勾選框 */
+.schedule-item .complete-checkbox {
+    margin-top: 4px;
+}
+
+/* 行程時間 */
+.schedule-item .time {
+    flex: 0 0 52px;
+    width: 52px;
+    margin-top: 2px;
+    white-space: nowrap;
+    font-size: 15px;
+}
+
+/* 行程內容 */
+.schedule-item .event {
+    flex: 1;
+    min-width: 0;
+}
+
+/* 行程名稱 */
+.schedule-item .event h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+/* ===== PinkPlanner 時間軸最終對齊修正 ===== */
+
+.schedule-item {
+    display: grid;
+    grid-template-columns: 22px 52px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 12px;
+
+    padding: 18px 10px 18px 20px;
+    margin-left: 8px;
+
+    border-left: 2px solid #f0c8dc;
+    border-bottom: 1px solid #f8edf2;
+}
+
+/* 圓形勾選框 */
+.schedule-item .complete-checkbox {
+    grid-column: 1;
+    width: 22px;
+    height: 22px;
+    margin: 1px 0 0;
+}
+
+/* 時間 */
+.schedule-item .time {
+    grid-column: 2;
+    width: 52px;
+    min-width: 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    line-height: 20px;
+    white-space: nowrap;
+}
+
+/* 行程內容 */
+.schedule-item .event {
+    grid-column: 3;
+    min-width: 0;
+    width: 100%;
+}
+
+/* 行程名稱 */
+.schedule-item .event h3 {
+    margin: 0 0 8px;
+    line-height: 1.5;
+}
+
+/* 交通資訊不超出欄位 */
+.schedule-item .transport-box {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+/* ===== PinkPlanner 全站統一粉圓字型 ===== */
+
+html,
+body,
+button,
+input,
+textarea,
+select,
+option {
+    font-family: "Huninn", sans-serif !important;
+}
+
+/* 所有網頁文字統一字型 */
+body * {
+    font-family: "Huninn", sans-serif !important;
+}
+
+
+/* ===== PinkPlanner 主功能分頁 ===== */
+
+.main-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 0 0 25px;
+    padding: 6px;
+    background: #f9e8f1;
+    border-radius: 18px;
+}
+
+.main-tab {
+    flex: 1;
+    padding: 13px 12px;
+    border: none;
+    border-radius: 13px;
+    background: transparent;
+    color: #b77a9b;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.main-tab:hover {
+    background: #fff5fa;
+}
+
+.main-tab.active {
+    background: #ffffff;
+    color: #c76b91;
+    box-shadow: 0 3px 10px rgba(199, 107, 145, 0.12);
+}
+
+/* ===== PinkPlanner 打卡清單卡片 ===== */
+
+.checklist-card {
+    background: #fff8fc;
+    border: 1px solid #f2d5e4;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(199, 107, 145, 0.08);
+}
+
+.checklist-card h3 {
+    margin: 0;
+    color: #c76b91;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+
+/* ===== 打卡清單粉紅圓形勾選框 ===== */
+
+.checklist-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 19px;
+    height: 19px;
+    min-width: 19px;
+
+    border: 2px solid #e6a7c4;
+    border-radius: 50%;
+    background: #ffffff;
+
+    cursor: pointer;
+    vertical-align: middle;
+    margin-right: 8px;
+
+    position: relative;
+    transition: 0.2s ease;
+}
+
+/* 勾選後變成粉紅色 */
+.checklist-checkbox:checked {
+    background: #d987ad;
+    border-color: #d987ad;
+}
+
+/* 顯示白色勾勾 */
+.checklist-checkbox:checked::after {
+    content: "✓";
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: bold;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* ===== 打卡點內容排版 ===== */
+
+.checklist-item {
+    background: #ffffff;
+    border: 1px solid #f5e1eb;
+    border-radius: 13px;
+
+    padding: 12px 15px;
+    margin-top: 12px;
+
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* 打卡點名稱 */
+.checklist-item p:first-of-type {
+    display: inline;
+    color: #b96f94;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* 位置、交通、備註 */
+.checklist-item p:not(:first-of-type) {
+    color: #947e8a;
+    font-size: 12px;
+
+    margin: 5px 0 0 27px;
+    line-height: 1.7;
+}
+
+/* 勾選框與名稱對齊 */
+.checklist-item .checklist-checkbox {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+
+/* ===== 打卡點整齊排版 ===== */
+
+.checklist-item {
+    background: #ffffff;
+    border: 1px solid #f5e1eb;
+    border-radius: 14px;
+    padding: 15px 18px;
+    margin-top: 12px;
+}
+
+/* 勾選框與名稱對齊 */
+.checklist-item .checklist-checkbox {
+    vertical-align: middle;
+    margin: 0 8px 0 0;
+}
+
+.checklist-item p:first-of-type {
+    display: inline;
+    vertical-align: middle;
+    margin: 0;
+    color: #b96f94;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* 位置、交通、備註整齊排列 */
+.checklist-item p:not(:first-of-type) {
+    display: block;
+    margin: 6px 0 0 27px;
+    color: #947e8a;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+
+/* ===== 編輯按鈕靠右下角 ===== */
+
+.edit-checklist-item-button {
+    display: block;
+    margin: -24px 0 0 auto;
+    padding: 6px 15px;
+
+    background: #fff0f7;
+    color: #c76b91;
+    border: 1px solid #efc6da;
+    border-radius: 10px;
+
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.edit-checklist-item-button:hover {
+    background: #f9dce9;
+}
+
+.edit-checklist-item-button:hover {
+    background: #f9dce9;
+}
+
+/* 新增打卡點按鈕 */
+.add-checklist-item-button {
+    display: block;
+    margin-top: 15px;
+    padding: 9px 16px;
+    background: #e9b4cf;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.add-checklist-item-button:hover {
+    background: #d98fb5;
+}
+
+
+/* ===== 打卡點編輯、刪除按鈕區 ===== */
+
+.checklist-item {
+    position: relative;
+    padding-bottom: 15px;
+}
+
+/* 按鈕靠右，兩個並排 */
+.checklist-item-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+
+    margin-top: -24px;
+    margin-left: auto;
+    width: fit-content;
+}
+
+/* 編輯按鈕 */
+.checklist-item-actions .edit-checklist-item-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    padding: 6px 13px;
+
+    background: #fff0f7;
+    color: #c76b91;
+    border: 1px solid #efc6da;
+    border-radius: 10px;
+
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* 刪除按鈕 */
+.delete-checklist-item-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    padding: 6px 13px;
+
+    background: #fff5f7;
+    color: #cc8299;
+    border: 1px solid #f0ceda;
+    border-radius: 10px;
+
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* 滑鼠移入效果 */
+.checklist-item-actions button:hover {
+    background: #f9dce9;
+}
+
+/* 小螢幕避免按鈕壓住文字 */
+@media (max-width: 480px) {
+    .checklist-item-actions {
+        margin-top: 10px;
+    }
+}
+
+/* ===== 打卡清單分類標題與操作按鈕 ===== */
+
+.checklist-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.checklist-group-header h3 {
+    margin: 0;
+    font-size: 15px;
+    color: #c76b91;
+}
+
+.checklist-group-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.checklist-group-actions button {
+    margin: 0;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+@media (max-width: 480px) {
+    .checklist-group-header {
+        flex-wrap: wrap;
+    }
+
+    .checklist-group-actions {
+        margin-left: auto;
+    }
+}
+
+
+/* ===== BTS X ARMY Firebase 按鈕 ===== */
+
+#firebaseLoginButton,
+#firebaseUploadButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 8px 5px;
+    padding: 11px 20px;
+
+    background: linear-gradient(135deg, #f8d5e7, #e9c8ed);
+    color: #986381;
+    border: 1px solid #e8b8d2;
+    border-radius: 25px;
+
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(199, 107, 145, 0.12);
+    transition: 0.2s ease;
+}
+
+#firebaseLoginButton:hover,
+#firebaseUploadButton:hover {
+    background: linear-gradient(135deg, #efb8d4, #dfb4e9);
+    transform: translateY(-2px);
+}
+
+#firebaseUploadButton:disabled {
+    opacity: 0.6;
+    cursor: wait;
+    transform: none;
+}
+
+/* ===== 朋友版共享行程 ===== */
+
+#firebaseViewer {
+    width: 100%;
+    padding: 0 !important;
+}
+
+#firebaseViewer h2 {
+    color: #c76b91;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+#firebaseViewer h3 {
+    color: #b8759b;
+    line-height: 1.6;
+}
+
+/* 修正朋友版行程文字擠壓 */
+
+#firebaseViewer .schedule-item {
+    display: block;
+    width: 100%;
+    padding: 16px 18px 16px 22px;
+    margin: 12px 0 12px 8px;
+    border-left: 2px solid #f0c8dc;
+    border-bottom: 1px solid #f8edf2;
+}
+
+#firebaseViewer .schedule-item p {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+    line-height: 1.8;
+    font-size: 14px;
+    color: #806b77;
+    overflow-wrap: anywhere;
+}
+
+/* 朋友版打卡清單 */
+
+#firebaseViewer .checklist-item {
+    margin: 12px 0;
+    padding: 15px 18px;
+    background: #ffffff;
+    border: 1px solid #f5e1eb;
+    border-radius: 14px;
+}
+
+#firebaseViewer .checklist-item p {
+    display: block;
+    margin: 6px 0;
+    line-height: 1.7;
+}
+
+/* ===== Firebase 管理員登出按鈕 ===== */
+
+#firebaseLogoutButton {
+    align-items: center;
+    justify-content: center;
+    margin: 8px 5px;
+    padding: 11px 20px;
+
+    background: #fff0f6;
+    color: #bf789e;
+    border: 1px solid #edc7da;
+    border-radius: 25px;
+
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+#firebaseLogoutButton:hover {
+    background: #f5d9e8;
+    transform: translateY(-2px);
+}
+
+
+/* ===== 朋友版 DAY 日期分頁 ===== */
+
+#sharedDateTabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 2px 12px;
+    margin-bottom: 12px;
+}
+
+#sharedDateTabs .date-tab {
+    white-space: pre-line;
+}
+
+/* ===== 朋友版沿用原本時間軸 ===== */
+
+#firebaseViewer .shared-schedule-item {
+    display: grid;
+    grid-template-columns: 22px 52px minmax(0, 1fr);
+    column-gap: 12px;
+    padding: 18px 10px 18px 20px;
+    margin-left: 8px;
+    border-left: 2px solid #f0c8dc;
+}
+
+#firebaseViewer .shared-schedule-item .event {
+    grid-column: 3;
+    min-width: 0;
+}
+
+#firebaseViewer .shared-schedule-item .time {
+    grid-column: 2;
+    white-space: nowrap;
+}
+
+#firebaseViewer .shared-schedule-item .complete-checkbox {
+    grid-column: 1;
+    opacity: 0.7;
+}
+
+#firebaseViewer .shared-schedule-item .transport-box {
+    max-width: 100%;
+}
+
+#firebaseViewer .shared-schedule-item .event p {
+    margin: 5px 0;
+    line-height: 1.7;
+}
+
+#firebaseViewer .checklist-checkbox:disabled {
+    opacity: 0.8;
+}
+
+/* ===== 朋友版打卡清單勾選框對齊 ===== */
+
+#firebaseViewer .checklist-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 8px;
+}
+
+#firebaseViewer .checklist-item .checklist-checkbox {
+    display: inline-block;
+    flex: 0 0 19px;
+    width: 19px;
+    height: 19px;
+    margin: 0;
+    vertical-align: middle;
+}
+
+#firebaseViewer .checklist-item p:first-of-type {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    line-height: 1.5;
+}
+
+#firebaseViewer .checklist-item p:not(:first-of-type) {
+    flex: 0 0 100%;
+    margin: 5px 0 0 27px;
+}
