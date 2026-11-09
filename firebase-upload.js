@@ -41,11 +41,8 @@ onAuthStateChanged(auth, user => {
     isAdmin = !!user && user.uid === ADMIN_UID;
     uploadButton.style.display = isAdmin ? "inline-flex" : "none";
 
-    if (isAdmin) {
-        scheduleSync();
-    } else {
+    // 暫時停止登入後自動同步，避免覆蓋雲端資料
         clearTimeout(pendingTimer);
-    }
 });
 
 function readChecklists() {
@@ -118,11 +115,9 @@ await setDoc(doc(db, "publicChecklists", "main"), {
 }
 
 function scheduleSync() {
-    clearTimeout(pendingTimer);
-
-    if (!isAdmin) return;
-
-    pendingTimer = setTimeout(syncChecklists, 500);
+    // 暫時停用自動同步與手動同步
+    // 等雲端打卡清單安全匯入後再恢復
+    return;
 }
 
 // 監聽同一個頁面對 localStorage 的修改

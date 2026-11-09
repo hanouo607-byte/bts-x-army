@@ -177,3 +177,86 @@ downloadButton.addEventListener("click", async () => {
     }
 });
 
+
+const checklistImportButton = document.createElement("button");
+checklistImportButton.type = "button";
+checklistImportButton.textContent = "💜 匯入雲端打卡清單";
+checklistImportButton.style.display = "none";
+
+document.querySelector(".header").appendChild(checklistImportButton);
+
+onAuthStateChanged(auth, user => {
+    checklistImportButton.style.display =
+        user?.uid === ADMIN_UID ? "inline-flex" : "none";
+});
+
+checklistImportButton.addEventListener("click", async () => {
+    if (auth.currentUser?.uid !== ADMIN_UID) {
+        alert("只有管理員可以匯入打卡清單。");
+        return;
+    }
+
+    const localValue = localStorage.getItem("pinkPlannerChecklists");
+
+    if (localValue !== null) {
+        let localChecklists;
+
+        try {
+            localChecklists = JSON.parse(localValue);
+        } catch {
+            alert("本機打卡資料格式異常，已停止匯入。");
+            return;
+        }
+
+        if (!Array.isArray(localChecklists) ||
+            localChecklists.length > 0) {
+            alert("本機已有打卡資料，為避免覆蓋，已停止匯入。");
+            return;
+        }
+    }
+
+    checklistImportButton.disabled = true;
+
+    try {
+        const snapshot = await getDoc(
+            doc(db, "publicChecklists", "main")
+        );
+
+        if (!snapshot.exists()) {
+            alert("找不到雲端打卡清單。");
+            return;
+        }
+
+        const cloudChecklists = snapshot.data().checklists;
+
+        if (!Array.isArray(cloudChecklists) ||
+            cloudChecklists.length === 0) {
+            alert("雲端打卡清單是空的，已停止匯入。");
+            return;
+        }
+
+        const confirmed = confirm(
+            "♡ 匯入雲端打卡清單 ♡\n\n" +
+            "雲端共有 " + cloudChecklists.length + " 組清單。\n\n" +
+            "將匯入目前瀏覽器並重新整理頁面。\n" +
+            "確定繼續嗎？"
+        );
+
+        if (!confirmed) return;
+
+        localStorage.setItem(
+            "pinkPlannerChecklists",
+            JSON.stringify(cloudChecklists)
+        );
+
+        alert("♡ 打卡清單匯入成功！");
+        location.reload();
+
+    } catch (error) {
+        console.error("打卡清單匯入失敗：", error);
+        alert("匯入失敗：" + error.message);
+    } finally {
+        checklistImportButton.disabled = false;
+    }
+});
+
