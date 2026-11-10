@@ -1757,3 +1757,50 @@ label[for="eventMapUrl"] {
     vertical-align: middle;
     margin-top: 10px;
 }
+
+/* ===== ♡ 全站編輯模式小按鈕 ===== */
+
+#globalEditModeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 0;
+position: absolute;
+right: 24px;
+top: 50%;
+transform: translateY(-50%);
+z-index: 2;
+
+    background: linear-gradient(135deg, #ffe2ee, #e9d8ff);
+    color: #a35c86;
+
+    border: 1px solid #f4bdd8;
+    border-radius: 50%;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(215, 148, 187, 0.18);
+    transition: all 0.2s ease;
+}
+
+/* ♡ 讓圓形編輯按鈕定位在旅遊卡片內 */
+.trip-card {
+    position: relative;
+    padding-right: 80px;
+}
+
+/* 滑鼠移入時維持垂直置中 */
+#globalEditModeButton:hover {
+    transform: translateY(calc(-50% - 2px));
+}
+
+/* 點擊時縮放 */
+#globalEditModeButton:active {
+    transform: translateY(-50%) scale(0.97);
+}

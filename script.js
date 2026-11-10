@@ -1,8 +1,16 @@
+// ===== ♡ 全站共用編輯模式 =====
+let globalEditMode = false;
+
+// 每日行程與打卡清單共用同一個編輯狀態
+let scheduleEditMode = false;
+let checklistEditMode = false;
 
 // ===== 取得網頁元素 =====
 
 
 const addButton = document.querySelector(".schedule-section .add-button");
+// ===== ♡ 預設隱藏新增行程按鈕 =====
+addButton.style.display = "none";
 const modal = document.getElementById("addModal");
 const closeButton = document.getElementById("closeModal");
 const saveButton = document.getElementById("saveEvent");
@@ -532,8 +540,11 @@ if (event.note) {
     content.appendChild(note);
 }
 
-        content.appendChild(editButton);
-        content.appendChild(deleteButton);
+// ===== ♡ 只有編輯模式才顯示編輯、刪除 =====
+if (scheduleEditMode) {
+    content.appendChild(editButton);
+    content.appendChild(deleteButton);
+}
 
         item.appendChild(completeCheckbox);
         item.appendChild(time);
@@ -719,6 +730,8 @@ switchMainTab(savedMainTab);
 /* ===== 打卡清單視窗開啟與關閉 ===== */
 
 const addChecklistButton = document.getElementById("addChecklistButton");
+// ===== ♡ 預設隱藏新增打卡清單 =====
+addChecklistButton.style.display = "none";
 const checklistModal = document.getElementById("checklistModal");
 const closeChecklistButton = document.getElementById("closeChecklistButton");
 
@@ -863,8 +876,11 @@ title.textContent =
             renderChecklists();
         });
 
-        groupActions.appendChild(editGroupButton);
-        groupActions.appendChild(deleteGroupButton);
+// ===== ♡ 編輯模式才顯示清單編輯、刪除 =====
+if (checklistEditMode) {
+    groupActions.appendChild(editGroupButton);
+    groupActions.appendChild(deleteGroupButton);
+}
 
         groupHeader.appendChild(title);
         groupHeader.appendChild(groupActions);
@@ -1134,31 +1150,6 @@ document.getElementById("checklistItemShopInfo").value =
 });
 
         
-editItemButton.addEventListener("click", function () {
-
-    // 記住目前編輯的清單和打卡點
-    window.activeChecklistId = checklist.id;
-    window.editingChecklistItemId = item.id;
-
-    // 帶入原本儲存的資料
-    document.getElementById("checklistItemName").value = item.name;
-    document.getElementById("checklistItemLocation").value = item.location || "";
-    document.getElementById("checklistItemTransport").value = item.transport || "";
-    document.getElementById("checklistItemNote").value = item.note || "";
-
-    // 修改視窗標題
-    document.querySelector("#checklistItemModal h2").textContent =
-        "♡ 編輯打卡點";
-
-    // 開啟視窗
-    document.getElementById("checklistItemModal").style.display = "flex";
-
-});
-
-
-        itemDiv.appendChild(editItemButton);
-
-        
 /* ===== 編輯與刪除按鈕 ===== */
 
 // 建立刪除按鈕
@@ -1199,12 +1190,17 @@ deleteItemButton.addEventListener("click", function () {
 const itemActions = document.createElement("div");
 itemActions.className = "checklist-item-actions";
 
-// 將編輯、刪除按鈕放進容器
-itemActions.appendChild(editItemButton);
-itemActions.appendChild(deleteItemButton);
+// ===== ♡ 只有編輯模式才顯示打卡點編輯、刪除 =====
+if (checklistEditMode) {
 
-// 將按鈕容器放進打卡點
-itemDiv.appendChild(itemActions);
+    // 將編輯、刪除按鈕放進容器
+    itemActions.appendChild(editItemButton);
+    itemActions.appendChild(deleteItemButton);
+
+    // 將按鈕容器放進打卡點
+    itemDiv.appendChild(itemActions);
+
+}
 
 
 card.appendChild(itemDiv);
@@ -1252,7 +1248,10 @@ document.getElementById("checklistItemShopInfo").value = "";
 });
 
 
-if (!isCollapsed) card.appendChild(addItemButton);
+// ===== ♡ 展開清單且開啟編輯模式才顯示新增打卡點 =====
+if (!isCollapsed && checklistEditMode) {
+    card.appendChild(addItemButton);
+}
 
 container.appendChild(card);
 
@@ -1353,8 +1352,68 @@ window.editingChecklistItemId = null;
 
     });
 
+// ===== ♡ 全站共用編輯模式按鈕 =====
+const globalEditModeButton = document.getElementById("globalEditModeButton");
 
+// 預設隱藏所有新增按鈕
+addButton.style.display = "none";
+addChecklistButton.style.display = "none";
 
+// 切換全站編輯模式
+globalEditModeButton.addEventListener("click", function () {
+
+    globalEditMode = !globalEditMode;
+
+    // 同步每日行程與打卡清單的編輯狀態
+    scheduleEditMode = globalEditMode;
+    checklistEditMode = globalEditMode;
+
+    // 重新顯示或隱藏編輯、刪除按鈕
+    renderEvents();
+    renderChecklists();
+
+    // 控制新增按鈕
+    addButton.style.display = globalEditMode ? "" : "none";
+    addChecklistButton.style.display = globalEditMode ? "" : "none";
+
+    // 控制旅遊資料編輯按鈕
+    const editTripButton = document.getElementById("editTripButton");
+
+    if (editTripButton) {
+        editTripButton.style.display = globalEditMode ? "" : "none";
+    }
+
+    // 更新按鈕文字
+globalEditModeButton.textContent = globalEditMode
+    ? "✓"
+    : "✎";
+
+});
+
+// ===== ♡ 打卡清單編輯模式切換 =====
+
+const checklistEditModeButton =
+    document.getElementById("checklistEditModeButton");
+
+checklistEditModeButton.addEventListener("click", function () {
+
+    // 切換編輯模式
+    checklistEditMode = !checklistEditMode;
+    // ===== ♡ 控制新增打卡清單按鈕 =====
+addChecklistButton.style.display =
+    checklistEditMode ? "" : "none";
+
+    // ===== ♡ 立即更新打卡清單畫面 =====
+renderChecklists();
+
+    // 更新按鈕文字
+    if (checklistEditMode) {
+        checklistEditModeButton.textContent = "✓ 完成編輯";
+    } else {
+        checklistEditModeButton.textContent = "✎ 編輯模式";
+    }
+
+});
 
 
 // 網頁載入時顯示已儲存的清單

@@ -10,6 +10,8 @@
 </head>
 <body>
 
+
+
     <div class="container">
 
         <header class="header">
@@ -18,9 +20,19 @@
         </header>
 
         <section class="trip-card">
-            <div class="trip-label">MY TRAVEL DIARY</div>
-            <h1>我的旅遊行程</h1>
-            <p>記錄與防彈美好的旅程 ♡</p>
+
+    <!-- ♡ 全站編輯模式按鈕 ♡ -->
+    <button type="button"
+            id="globalEditModeButton"
+            class="edit-mode-button"
+            title="切換全站編輯模式"
+            aria-label="切換全站編輯模式">
+        ✎
+    </button>
+
+    <div class="trip-label">MY TRAVEL DIARY</div>
+    <h1>我的旅遊行程</h1>
+    <p>記錄與防彈美好的旅程 ♡</p>
 
 <div class="trip-info">
     <span id="tripDateDisplay">📅 2026.11.19 - 11.22</span>
@@ -49,11 +61,11 @@
 <!-- ===== 打卡清單分頁內容 ===== -->
 <section id="checklistSection" class="checklist-section" style="display: none;">
 
-    <h2>♡ 我的打卡清單</h2>
+<h2>♡ 我的打卡清單</h2>
 
-    <p>把想去的景點和拍照點收藏在這裡。</p>
+<p>把想去的景點和拍照點收藏在這裡。</p>
 
-    <div id="checklistGroups"></div>
+<div id="checklistGroups"></div>
 
     <button id="addChecklistButton" class="add-button">
         ＋ 新增打卡清單
@@ -170,7 +182,7 @@
 
         <section class="schedule-section">
 
-            <div id="dateTabs"></div>
+    <div id="dateTabs"></div>
 
             <div id="scheduleList">
             <p class="empty-message">還沒有行程喔，新增一筆吧！ ♡</p>
@@ -185,7 +197,7 @@
             <input type="date" id="eventDate">
 
             <label>時間</label>
-            <input type="time" id="eventTime">
+            <input type="time" id="eventTime"><section class="schedule-section">
 
             <label>行程名稱</label>
             <input type="text" id="eventTitle" placeholder="今天要去哪裡呢？">
