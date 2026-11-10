@@ -450,6 +450,7 @@ if (event.transport) {
         "火車": "🚆",
         "高鐵": "🚄",
         "公車": "🚌",
+        "飛機": "✈️",
         "計程車": "🚕",
         "其他": "🚗"
     };
@@ -1067,6 +1068,33 @@ if (item.mapUrl) {
     }
 }
 
+// ===== ♡ 打卡點圖片按鈕 =====
+if (item.image) {
+
+    const imageButton = document.createElement("button");
+
+    imageButton.type = "button";
+    imageButton.className = "checklist-image-button";
+    imageButton.textContent = "📷";
+    imageButton.title = "查看打卡點圖片";
+
+    imageButton.addEventListener("click", function () {
+
+        const imagePreview = document.getElementById(
+            "checklistImagePreview"
+        );
+
+        imagePreview.src = item.image;
+
+        document.getElementById(
+            "checklistImageModal"
+        ).style.display = "flex";
+
+    });
+
+    itemDiv.appendChild(imageButton);
+}
+
 // ===== ♡ 打卡備註獨立一行 =====
 if (item.note) {
     const noteText = document.createElement("p");
@@ -1089,6 +1117,8 @@ noteText.style.clear = "both";
 
         
 editItemButton.addEventListener("click", function () {
+    // ===== ♡ 每次編輯時重設照片刪除狀態 =====
+checklistImageMarkedForDeletion = false;
 
     // 記住目前編輯的清單和打卡點
     window.activeChecklistId = checklist.id;
@@ -1139,6 +1169,26 @@ document.getElementById("checklistItemShopPlatform").value =
 
 document.getElementById("checklistItemShopInfo").value =
     item.shopInfo || "";
+
+    // ===== ♡ 編輯打卡點時顯示已上傳圖片 =====
+const existingImageBox = document.getElementById(
+    "checklistExistingImageBox"
+);
+
+const existingImage = document.getElementById(
+    "checklistExistingImage"
+);
+
+// 清空上次選擇的檔案，避免誤用舊圖片
+document.getElementById("checklistItemImage").value = "";
+
+if (item.image) {
+    existingImage.src = item.image;
+    existingImageBox.style.display = "block";
+} else {
+    existingImage.removeAttribute("src");
+    existingImageBox.style.display = "none";
+}
 
     // 修改視窗標題
     document.querySelector("#checklistItemModal h2").textContent =
@@ -1217,7 +1267,20 @@ addItemButton.className = "add-checklist-item-button";
 
 
 addItemButton.addEventListener("click", function () {
+    // ===== ♡ 新增打卡點時重設照片刪除狀態 =====
+checklistImageMarkedForDeletion = false;
     window.editingChecklistItemId = null;
+
+    // ===== ♡ 新增打卡點時清空圖片 =====
+
+// 清空上次選擇的圖片檔案
+document.getElementById("checklistItemImage").value = "";
+
+// 隱藏舊照片預覽區
+document.getElementById("checklistExistingImageBox").style.display = "none";
+
+// 清除舊照片預覽
+document.getElementById("checklistExistingImage").removeAttribute("src");
 
     // 記住目前選擇的景點清單
     window.activeChecklistId = checklist.id;
@@ -1263,7 +1326,7 @@ container.appendChild(card);
 /* ===== 儲存新增的打卡點 ===== */
 
 document.getElementById("saveChecklistItemButton")
-    .addEventListener("click", function () {
+    .addEventListener("click", async function () {
 
         // 取得輸入的資料
         const name = document.getElementById("checklistItemName").value.trim();
@@ -1276,6 +1339,20 @@ const mapUrl = document.getElementById("checklistItemMapUrl").value.trim();
 // ===== ♡ 取得打卡點社群平台與網址 =====
 const shopPlatform = document.getElementById("checklistItemShopPlatform").value;
 const shopInfo = document.getElementById("checklistItemShopInfo").value.trim();
+// ===== ♡ 讀取打卡點上傳圖片 =====
+const imageInput = document.getElementById("checklistItemImage");
+const imageFile = imageInput.files[0];
+
+let imageData = null;
+
+if (imageFile) {
+    try {
+        imageData = await resizeChecklistImage(imageFile);
+    } catch (error) {
+        alert("圖片處理失敗：" + error.message);
+        return;
+    }
+}
 
         // 打卡點名稱不可空白
         if (name === "") {
@@ -1315,6 +1392,15 @@ existingItem.note = note;
 existingItem.mapUrl = mapUrl;
 existingItem.shopPlatform = shopPlatform;
 existingItem.shopInfo = shopInfo;
+// ===== ♡ 儲存照片新增、更換或刪除 =====
+if (imageData !== null) {
+    // 有選擇新照片：儲存新照片
+    existingItem.image = imageData;
+
+} else if (checklistImageMarkedForDeletion) {
+    // 有按 × 且沒有選新照片：刪除舊照片
+    existingItem.image = null;
+}
 
 } else {
 
@@ -1329,6 +1415,7 @@ note: note,
 mapUrl: mapUrl,
 shopPlatform: shopPlatform,
 shopInfo: shopInfo,
+image: imageData,
 completed: false
     });
 
@@ -1339,10 +1426,25 @@ window.editingChecklistItemId = null;
 
 
         // 儲存到瀏覽器
-        localStorage.setItem(
-            "pinkPlannerChecklists",
-            JSON.stringify(checklists)
-        );
+// ===== ♡ 安全儲存打卡點資料 =====
+try {
+    localStorage.setItem(
+        "pinkPlannerChecklists",
+        JSON.stringify(checklists)
+    );
+} catch (error) {
+    alert(
+        "♡ 圖片或資料太大，儲存失敗！\n" +
+        "請先備份資料，並嘗試使用較小的圖片。"
+    );
+
+    // 恢復上一次成功儲存的資料
+    checklists = JSON.parse(
+        localStorage.getItem("pinkPlannerChecklists") || "[]"
+    );
+
+    return;
+}
 
         // 關閉視窗
         document.getElementById("checklistItemModal").style.display = "none";
@@ -1390,36 +1492,110 @@ globalEditModeButton.textContent = globalEditMode
 
 });
 
-// ===== ♡ 打卡清單編輯模式切換 =====
+// ===== ♡ 關閉打卡點圖片預覽視窗 =====
+const checklistImageModal = document.getElementById("checklistImageModal");
+const closeChecklistImageButton = document.getElementById("closeChecklistImageButton");
 
-const checklistEditModeButton =
-    document.getElementById("checklistEditModeButton");
-
-checklistEditModeButton.addEventListener("click", function () {
-
-    // 切換編輯模式
-    checklistEditMode = !checklistEditMode;
-    // ===== ♡ 控制新增打卡清單按鈕 =====
-addChecklistButton.style.display =
-    checklistEditMode ? "" : "none";
-
-    // ===== ♡ 立即更新打卡清單畫面 =====
-renderChecklists();
-
-    // 更新按鈕文字
-    if (checklistEditMode) {
-        checklistEditModeButton.textContent = "✓ 完成編輯";
-    } else {
-        checklistEditModeButton.textContent = "✎ 編輯模式";
-    }
-
+closeChecklistImageButton.addEventListener("click", function () {
+    checklistImageModal.style.display = "none";
 });
+
+// ===== ♡ 將打卡點圖片縮小後轉成可儲存格式 =====
+function resizeChecklistImage(file) {
+    return new Promise(function (resolve, reject) {
+        if (!file || !file.type.startsWith("image/")) {
+            reject(new Error("請選擇圖片檔案"));
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function () {
+            const image = new Image();
+
+            image.onload = function () {
+                const canvas = document.createElement("canvas");
+                const maxSize = 900;
+
+                const scale = Math.min(
+                    1,
+                    maxSize / Math.max(image.width, image.height)
+                );
+
+                canvas.width = Math.round(image.width * scale);
+                canvas.height = Math.round(image.height * scale);
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+                resolve(canvas.toDataURL("image/jpeg", 0.7));
+            };
+
+            image.onerror = function () {
+                reject(new Error("無法讀取圖片"));
+            };
+
+            image.src = reader.result;
+        };
+
+        reader.onerror = function () {
+            reject(new Error("圖片讀取失敗"));
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+// ===== ♡ 選擇打卡點圖片時立即預覽 =====
+document.getElementById("checklistItemImage")
+    .addEventListener("change", function () {
+
+        const file = this.files[0];
+        const previewBox = document.getElementById("checklistExistingImageBox");
+        const previewImage = document.getElementById("checklistExistingImage");
+
+        if (!file) {
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            alert("請選擇圖片檔案 ♡");
+            this.value = "";
+            return;
+        }
+
+        const previewUrl = URL.createObjectURL(file);
+
+        previewImage.onload = function () {
+            URL.revokeObjectURL(previewUrl);
+            previewImage.onload = null;
+        };
+
+        previewImage.src = previewUrl;
+        previewBox.style.display = "block";
+    });
+
+    // ===== ♡ 打卡點照片刪除狀態 =====
+let checklistImageMarkedForDeletion = false;
+
+// ===== ♡ 點擊 × 移除照片預覽 =====
+document.getElementById("deleteChecklistImageButton")
+    .addEventListener("click", function () {
+
+        checklistImageMarkedForDeletion = true;
+
+        // 清除尚未儲存的新選圖片
+        document.getElementById("checklistItemImage").value = "";
+
+        // 隱藏照片預覽
+        document.getElementById("checklistExistingImageBox").style.display = "none";
+
+        // 清空預覽圖片
+        document.getElementById("checklistExistingImage").removeAttribute("src");
+    });
 
 
 // 網頁載入時顯示已儲存的清單
 renderChecklists();
-
-
 
 // 開啟網頁時執行
 loadTripData();

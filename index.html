@@ -120,6 +120,7 @@
     <option value="火車">🚆 火車</option>
     <option value="高鐵">🚄 高鐵</option>
     <option value="公車">🚌 公車</option>
+    <option value="飛機">✈️ 飛機</option>
     <option value="計程車">🚕 計程車</option>
     <option value="其他">🚗 其他</option>
 </select>
@@ -137,6 +138,38 @@
     id="checklistTransportRoute"
     placeholder="例如：高雄捷運紅線"
 >
+<!-- ===== ♡ 打卡點圖片上傳 ===== -->
+<label for="checklistItemImage">打卡點圖片</label>
+<input
+    type="file"
+    id="checklistItemImage"
+    accept="image/*"
+>
+<!-- ===== ♡ 已上傳圖片預覽 ===== -->
+<div id="checklistExistingImageBox"
+     style="display: none; margin-top: 12px;">
+
+    <p style="font-size: 13px; color: #c66d9a;">
+        ♡ 目前已上傳的圖片
+    </p>
+
+    <div class="checklist-image-preview-wrapper">
+
+        <img
+            id="checklistExistingImage"
+            alt="已上傳的打卡點圖片"
+        >
+
+        <button
+            type="button"
+            id="deleteChecklistImageButton"
+            title="刪除照片"
+            aria-label="刪除照片"
+        >×</button>
+
+    </div>
+
+</div>
 <!-- ===== ♡ 打卡點 Google Maps ===== -->
 <label for="checklistItemMapUrl">Google Maps</label>
 <input
@@ -217,6 +250,7 @@
             <option value="火車">🚆 火車</option>
             <option value="高鐵">🚄 高鐵</option>
             <option value="公車">🚌 公車</option>
+            <option value="飛機">✈️ 飛機</option>
             <option value="計程車">🚕 計程車</option>
             <option value="其他">🚗 其他</option>
         </select>
@@ -266,6 +300,24 @@
     </div>
         </section>
 
+<!-- ===== ♡ 打卡點圖片預覽視窗 ===== -->
+<div id="checklistImageModal" class="modal">
+    <div class="modal-content">
+
+        <button
+            type="button"
+            id="closeChecklistImageButton">
+            ×
+        </button>
+
+        <img
+            id="checklistImagePreview"
+            alt="打卡點圖片"
+            style="width:100%; max-height:70vh; object-fit:contain;"
+        >
+
+    </div>
+</div>
 
 <!-- ===== 編輯旅遊資料視窗 ===== -->
 

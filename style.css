@@ -700,6 +700,7 @@ footer {
     font-size: 11px;
     line-height: 1;
     box-sizing: border-box;
+    padding-top: 2px;
 }
 
 /* ===== 可愛圓形完成勾選框 ===== */
@@ -1803,4 +1804,225 @@ z-index: 2;
 /* 點擊時縮放 */
 #globalEditModeButton:active {
     transform: translateY(-50%) scale(0.97);
+}
+
+/* ===== ♡ 打卡點圖片按鈕 ===== */
+.checklist-image-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    margin-left: 8px;
+    padding: 0;
+
+    background: #fce5ef;
+    color: #c66d9a;
+
+    border: 1px solid #f4bfd5;
+    border-radius: 10px;
+
+    font-size: 17px;
+    line-height: 1;
+    vertical-align: middle;
+
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.checklist-image-button:hover {
+    background: #f8d2e3;
+    transform: translateY(-1px);
+}
+
+/* ===== ♡ 圖片預覽視窗 ===== */
+#checklistImageModal .modal-content {
+    position: relative;
+    padding: 52px 16px 16px;
+    border-radius: 20px;
+    background: #fff8fc;
+    max-width: 650px;
+    width: 90%;
+    box-sizing: border-box;
+}
+
+/* ===== ♡ 圖片預覽右上角關閉按鈕 ===== */
+#closeChecklistImageButton {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    left: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    padding: 0;
+    margin: 0;
+
+    background: #fce5ef;
+    color: #c66d9a;
+    border: 1px solid #f4bfd5;
+    border-radius: 50%;
+
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1;
+
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(198, 109, 154, 0.12);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+#closeChecklistImageButton:hover {
+    background: #f8d2e3;
+    transform: scale(1.08);
+}
+
+/* ===== ♡ 圖片關閉按鈕：精準置中 ===== */
+#closeChecklistImageButton {
+    font-size: 0;
+    padding: 0;
+    position: absolute;
+}
+
+/* 使用 CSS 畫出置中的 × */
+#closeChecklistImageButton::before,
+#closeChecklistImageButton::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    width: 12px;
+    height: 1.5px;
+
+    background: #c66d9a;
+    border-radius: 2px;
+}
+
+#closeChecklistImageButton::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+#closeChecklistImageButton::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+/* ===== ♡ 打卡點圖片按鈕縮小 ===== */
+.checklist-image-button {
+    width: auto;
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+
+    padding: 6px 10px;
+    margin-left: 6px;
+
+    font-size: 13px;
+    line-height: 1.2;
+
+    border-radius: 12px;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+/* ===== ♡ 打卡點照片預覽與刪除按鈕 ===== */
+
+.checklist-image-preview-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+#checklistExistingImage {
+    display: block;
+    width: 120px;
+    max-height: 120px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid #f4bfd5;
+}
+
+#deleteChecklistImageButton {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+    padding: 0;
+
+    background: #fce5ef;
+    color: #c66d9a;
+    border: 1px solid #f4bfd5;
+    border-radius: 50%;
+
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+#deleteChecklistImageButton:hover {
+    background: #f8d2e3;
+}
+
+/* ===== ♡ 修正照片刪除按鈕位置 ===== */
+
+.checklist-image-preview-wrapper {
+    position: relative !important;
+    display: inline-block !important;
+    width: 120px;
+    height: auto;
+    vertical-align: top;
+}
+
+#deleteChecklistImageButton {
+    position: absolute !important;
+
+    top: 4px !important;
+    right: 4px !important;
+    bottom: auto !important;
+    left: auto !important;
+
+    margin: 0 !important;
+    transform: none !important;
+    z-index: 10;
+}
+
+/* ===== ♡ 刪除照片 × 精準置中 ===== */
+
+#deleteChecklistImageButton {
+    font-size: 0 !important;
+    padding: 0 !important;
+}
+
+#deleteChecklistImageButton::before,
+#deleteChecklistImageButton::after {
+    content: "";
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 11px;
+    height: 1.5px;
+
+    background: #c66d9a;
+    border-radius: 2px;
+}
+
+#deleteChecklistImageButton::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+#deleteChecklistImageButton::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
 }
