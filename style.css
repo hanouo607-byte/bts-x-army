@@ -2026,3 +2026,75 @@ z-index: 2;
 #deleteChecklistImageButton::after {
     transform: translate(-50%, -50%) rotate(-45deg);
 }
+
+/* ===== ♡ 打卡點拖曳把手 ===== */
+.checklist-drag-handle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 28px;
+    height: 28px;
+    margin-bottom: 8px;
+
+    background: #fce5ef;
+    color: #c66d9a;
+    border: 1px solid #f4bfd5;
+    border-radius: 9px;
+
+    font-size: 21px;
+    line-height: 1;
+
+    cursor: grab;
+    user-select: none;
+}
+
+.checklist-drag-handle:active {
+    cursor: grabbing;
+    background: #f8d2e3;
+}
+
+/* ===== ♡ 打卡點拖曳把手：低調灰色右上角 ===== */
+
+.checklist-item {
+    position: relative;
+}
+
+.checklist-drag-handle {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+
+    margin: 0;
+    padding: 0;
+
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+
+    color: #aaaaaa;
+    opacity: 0.55;
+
+    font-size: 20px;
+    line-height: 1;
+
+    cursor: grab;
+    user-select: none;
+}
+
+.checklist-drag-handle:hover {
+    color: #777777;
+    opacity: 0.9;
+}
+
+.checklist-drag-handle:active {
+    cursor: grabbing;
+}

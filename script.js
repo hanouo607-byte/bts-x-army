@@ -563,6 +563,8 @@ renderEvents();
 /* ===== 編輯旅遊資料視窗 ===== */
 
 const editTripButton = document.getElementById("editTripButton");
+// ===== ♡ 預設隱藏編輯旅遊資料按鈕 =====
+editTripButton.style.display = "none";
 const tripModal = document.getElementById("tripModal");
 const closeTripButton = document.getElementById("closeTripButton");
 
@@ -933,9 +935,99 @@ if (isCollapsed) {
             const itemDiv = document.createElement("div");
             itemDiv.className = "checklist-item";
 
+            // ===== ♡ 打卡點拖曳排序 =====
+if (checklistEditMode) {
+
+    // 允許其他打卡點拖曳到這張卡片
+    itemDiv.addEventListener("dragover", function (event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+    });
+
+    // 放開滑鼠後調整順序
+    itemDiv.addEventListener("drop", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const draggedId = Number(
+            event.dataTransfer.getData("text/plain")
+        );
+
+        const fromIndex = checklist.items.findIndex(function (savedItem) {
+            return savedItem.id === draggedId;
+        });
+
+        const toIndex = checklist.items.findIndex(function (savedItem) {
+            return savedItem.id === item.id;
+        });
+
+        // 找不到打卡點或拖回原位時，不做任何修改
+        if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
+            return;
+        }
+
+        // 調整打卡點在陣列中的順序
+        const movedItem = checklist.items.splice(fromIndex, 1)[0];
+        checklist.items.splice(toIndex, 0, movedItem);
+
+        // 儲存新的排序
+        try {
+            localStorage.setItem(
+                "pinkPlannerChecklists",
+                JSON.stringify(checklists)
+            );
+        } catch (error) {
+            // 儲存失敗時恢復原本順序
+            checklist.items.splice(toIndex, 1);
+            checklist.items.splice(fromIndex, 0, movedItem);
+
+            alert("♡ 排序儲存失敗，原本順序已保留！");
+            return;
+        }
+
+        // 更新畫面
+        renderChecklists();
+    });
+}
+
             const itemName = document.createElement("p");
             itemName.textContent = item.name;
 
+// ===== ♡ 打卡點拖曳把手 =====
+if (checklistEditMode) {
+
+    const dragHandle = document.createElement("span");
+
+    dragHandle.className = "checklist-drag-handle";
+    dragHandle.textContent = "⠿";
+    dragHandle.title = "按住拖曳調整順序";
+
+    // ===== ♡ 只有按住把手才能開始拖曳 =====
+// ===== ♡ 拖曳時讓整張打卡點卡片一起移動 =====
+itemDiv.draggable = true;
+
+// 只有按住右上角把手才能拖曳
+itemDiv.draggable = false;
+
+dragHandle.addEventListener("mousedown", function () {
+    itemDiv.draggable = true;
+});
+
+itemDiv.addEventListener("dragstart", function (event) {
+    event.dataTransfer.setData("text/plain", String(item.id));
+    event.dataTransfer.effectAllowed = "move";
+});
+
+itemDiv.addEventListener("dragend", function () {
+    itemDiv.draggable = false;
+});
+
+dragHandle.addEventListener("mouseup", function () {
+    itemDiv.draggable = false;
+});
+
+    itemDiv.appendChild(dragHandle);
+}
 
 // 建立打卡勾選框
 const checkbox = document.createElement("input");
