@@ -1702,7 +1702,7 @@ function resizeChecklistImage(file) {
 
             image.onload = function () {
                 const canvas = document.createElement("canvas");
-                const maxSize = 900;
+                const maxSize = 600;
 
                 const scale = Math.min(
                     1,
@@ -1715,7 +1715,7 @@ function resizeChecklistImage(file) {
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-                resolve(canvas.toDataURL("image/jpeg", 0.7));
+                resolve(canvas.toDataURL("image/jpeg", 0.5));
             };
 
             image.onerror = function () {
