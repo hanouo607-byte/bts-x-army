@@ -794,7 +794,17 @@ function renderChecklists() {
 
         // 景點或區域名稱
         const title = document.createElement("h3");
-        title.textContent = "♡ " + checklist.name;
+        // ===== ♡ 計算打卡清單完成進度 =====
+const totalCount = checklist.items.length;
+
+const completedCount = checklist.items.filter(function (item) {
+    return item.completed === true;
+}).length;
+
+// 顯示清單名稱與完成數量
+title.textContent =
+    checklist.name +
+    " (" + completedCount + "/" + totalCount + ")";
         
         // 分類標題與操作按鈕
         const groupHeader = document.createElement("div");
@@ -862,10 +872,46 @@ function renderChecklists() {
 
 
 card.appendChild(groupHeader);
+// ===== ♡ 打卡清單愛心收合功能 =====
+
+// 記住每個清單是否收合
+const collapsedKey = "pinkPlannerCollapsed_" + checklist.id;
+
+let isCollapsed =
+    localStorage.getItem(collapsedKey) === "true";
+
+    // ===== ♡ 根據收合狀態切換愛心 =====
+title.textContent =
+    (isCollapsed ? "♥ " : "♡ ") +
+    checklist.name +
+    " (" + completedCount + "/" + totalCount + ")";
+
+// 點擊標題前面的愛心，切換收合狀態
+title.style.cursor = "pointer";
+
+title.addEventListener("click", function (event) {
+
+    // 只有點擊愛心才收合
+    const rect = title.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+
+    if (clickX > 24) return;
+
+    isCollapsed = !isCollapsed;
+
+    localStorage.setItem(collapsedKey, String(isCollapsed));
+
+    renderChecklists();
+});
+
+// 收合時不顯示打卡點
+if (isCollapsed) {
+    card.classList.add("checklist-collapsed");
+}
 
 
         // 顯示這個景點清單裡的打卡點
-        checklist.items.forEach(function (item) {
+        if (!isCollapsed) checklist.items.forEach(function (item) {
 
             const itemDiv = document.createElement("div");
             itemDiv.className = "checklist-item";
@@ -891,6 +937,9 @@ checkbox.addEventListener("change", function () {
         "pinkPlannerChecklists",
         JSON.stringify(checklists)
     );
+
+    // ===== ♡ 即時更新打卡完成數量 =====
+    renderChecklists();
 
 });
 
@@ -1203,7 +1252,7 @@ document.getElementById("checklistItemShopInfo").value = "";
 });
 
 
-card.appendChild(addItemButton);
+if (!isCollapsed) card.appendChild(addItemButton);
 
 container.appendChild(card);
 
