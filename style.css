@@ -1736,3 +1736,24 @@ label[for="eventMapUrl"] {
     margin: 10px 0 8px 29px !important;
     box-sizing: border-box;
 }
+
+/* ===== ♡ 打卡備註靠左對齊 ===== */
+.checklist-item > p:last-of-type {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    transform: none !important;
+    text-indent: 0 !important;
+}
+
+/* ===== ♡ 每日行程操作按鈕獨立排列 ===== */
+.schedule-item .edit-button {
+    clear: left;
+    margin-left: 0;
+}
+
+.schedule-item .edit-button,
+.schedule-item .delete-button {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 10px;
+}

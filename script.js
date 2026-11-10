@@ -1007,6 +1007,11 @@ if (item.note) {
     const noteText = document.createElement("p");
     noteText.className = "checklist-note";
     noteText.textContent = "♡ 備註：" + item.note;
+    noteText.style.display = "block";
+noteText.style.marginLeft = "0";
+noteText.style.paddingLeft = "0";
+noteText.style.transform = "none";
+noteText.style.clear = "both";
     itemDiv.appendChild(noteText);
 }
 
