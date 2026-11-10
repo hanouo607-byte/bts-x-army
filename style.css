@@ -1467,3 +1467,272 @@ body * {
         padding: 11px 18px;
     }
 }
+
+/* ===== ♡ BTS X ARMY 中韓日圓體字型 ===== */
+
+body,
+body * {
+    font-family:
+        "Huninn",
+        "Gowun Dodum",
+        "M PLUS Rounded 1c",
+        sans-serif !important;
+}
+
+/* ===== ♡ 每日行程備註間距 ===== */
+.schedule-note {
+    margin-top: 12px;
+    margin-bottom: 10px;
+    line-height: 1.7;
+}
+
+/* ===== ♡ 每日行程編輯／刪除按鈕統一大小 ===== */
+
+.schedule-item .edit-button,
+.schedule-item .delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 76px;
+    height: 32px;
+    padding: 0 8px;
+
+    box-sizing: border-box;
+    border-radius: 999px;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* ===== ♡ Google Maps 粉嫩連結 ===== */
+.schedule-map-link {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 12px;
+    padding: 9px 15px;
+    border: 1px solid #efc4d9;
+    border-radius: 999px;
+    background: #fff0f7;
+    color: #bd6999;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.schedule-map-link:hover {
+    background: #f9dce9;
+    transform: translateY(-2px);
+}
+
+/* ===== ♡ 店家／社群超連結美化 ===== */
+.schedule-shop-link {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 12px;
+    margin-right: 8px;
+    padding: 9px 15px;
+
+    border: 1px solid #e8c4ed;
+    border-radius: 999px;
+    background: #f8efff;
+
+    color: #9b6bb3;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: all 0.2s ease;
+}
+
+.schedule-shop-link:hover {
+    background: #eedcf8;
+    transform: translateY(-2px);
+}
+
+/* ===== ♡ 店家／社群平台欄位美化 ===== */
+
+label[for="eventShopPlatform"],
+label[for="eventShopInfo"],
+label[for="eventMapUrl"] {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    color: #a65d83;
+    font-weight: 600;
+}
+
+/* 平台選擇、網址輸入框 */
+#eventShopPlatform,
+#eventShopInfo,
+#eventMapUrl {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 42px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+
+    border: 1px solid #efc4d9;
+    border-radius: 12px;
+    background: #fffafd;
+    color: #80536d;
+
+    font-size: 13px;
+    font-family: inherit;
+}
+
+/* 點擊輸入時的粉嫩外框 */
+#eventShopPlatform:focus,
+#eventShopInfo:focus,
+#eventMapUrl:focus {
+    outline: none;
+    border-color: #db92b7;
+    box-shadow: 0 0 0 3px rgba(235, 165, 201, 0.18);
+}
+
+/* ===== ♡ 新增／編輯行程字體統一 ===== */
+
+/* 所有欄位標題 */
+#addModal label {
+    font-family: "Huninn", "Gowun Dodum",
+                 "M PLUS Rounded 1c", sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #a65d83;
+    letter-spacing: 0;
+}
+
+/* 所有輸入框、下拉選單、備註 */
+#addModal input,
+#addModal select,
+#addModal textarea {
+    font-family: "Huninn", "Gowun Dodum",
+                 "M PLUS Rounded 1c", sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    color: #80536d;
+}
+
+/* 提示文字也統一 */
+#addModal input::placeholder,
+#addModal textarea::placeholder {
+    font-family: inherit !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+}
+
+/* ===== ♡ 行程連結按鈕：小巧緊湊版 ===== */
+
+.schedule-map-link,
+.schedule-shop-link {
+    margin-top: 4px;
+    margin-bottom: 2px;
+    margin-right: 5px;
+
+    padding: 5px 10px;
+    font-size: 11px;
+    line-height: 1.4;
+
+    border-radius: 999px;
+}
+
+/* ===== ♡ 打卡清單交通方式粉嫩下拉選單 ===== */
+
+#checklistItemTransport {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+
+    border: 1px solid #efc4d9;
+    border-radius: 12px;
+
+    background-color: #ffffff;
+    color: #a66b8c;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    outline: none;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+#checklistItemTransport:focus {
+    border-color: #d99cbd;
+    box-shadow: 0 0 0 3px rgba(239, 196, 217, 0.25);
+}
+
+/* ===== ♡ 打卡清單社群平台粉嫩下拉選單 ===== */
+
+#checklistItemShopPlatform {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+
+    border: 1px solid #efc4d9;
+    border-radius: 12px;
+
+    background-color: #ffffff;
+    color: #a66b8c;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    outline: none;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+#checklistItemShopPlatform:focus {
+    border-color: #d99cbd;
+    box-shadow: 0 0 0 3px rgba(239, 196, 217, 0.25);
+}
+
+/* ===== ♡ 打卡名稱與勾選框排列 ===== */
+.checklist-title-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding-left: 0;
+    margin-bottom: 8px;
+}
+
+.checklist-title-row .checklist-checkbox {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.checklist-title-row p {
+    margin: 0;
+}
+
+/* ===== ♡ 打卡清單備註獨立一行 ===== */
+
+.checklist-item > p {
+    display: block;
+    width: auto;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+/* 備註與打卡名稱文字對齊 */
+.checklist-item > p:not(.checklist-title-row p) {
+    margin-left: 29px;
+    clear: both;
+}
+
+/* ===== ♡ 打卡備註與名稱文字對齊 ===== */
+.checklist-item .checklist-note {
+    display: block !important;
+    width: 100% !important;
+    clear: both;
+    margin: 10px 0 8px 29px !important;
+    box-sizing: border-box;
+}

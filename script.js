@@ -38,6 +38,14 @@ document.getElementById("eventDate").value = selectedDate || "";
     document.getElementById("eventTitle").value = "";
     document.getElementById("eventPlace").value = "";
     document.getElementById("eventNote").value = "";
+    // ===== ♡ 清空 Google Maps 網址 =====
+document.getElementById("eventMapUrl").value = "";
+
+// ===== ♡ 新增行程時清空社群網址 =====
+document.getElementById("eventShopInfo").value = "";
+
+// ===== ♡ 新增行程時預設 Instagram =====
+document.getElementById("eventShopPlatform").value = "instagram";
     
  
 // 清空交通資訊
@@ -72,6 +80,13 @@ saveButton.addEventListener("click", function () {
     const title = document.getElementById("eventTitle").value.trim();
     const place = document.getElementById("eventPlace").value.trim();
     const note = document.getElementById("eventNote").value.trim();
+    // ===== ♡ 取得 Google Maps 網址 =====
+const mapUrl = document.getElementById("eventMapUrl").value.trim();
+// ===== ♡ 取得店家資訊 =====
+const shopInfo = document.getElementById("eventShopInfo").value.trim();
+
+// ===== ♡ 取得店家／社群平台 =====
+const shopPlatform = document.getElementById("eventShopPlatform").value;
     
 // ===== 取得交通資訊 =====
 
@@ -104,7 +119,9 @@ if (editingEventId !== null) {
         existingEvent.title = title;
         existingEvent.place = place;
         existingEvent.note = note;
-        
+        existingEvent.mapUrl = mapUrl;
+        existingEvent.shopInfo = shopInfo;
+        existingEvent.shopPlatform = shopPlatform;
 existingEvent.transport = transport;
 existingEvent.transportFrom = transportFrom;
 existingEvent.transportTo = transportTo;
@@ -125,6 +142,9 @@ const newEvent = {
     title: title,
     place: place,
     note: note,
+    mapUrl: mapUrl,
+    shopInfo: shopInfo,
+    shopPlatform: shopPlatform,
     transport: transport,
     transportFrom: transportFrom,
     transportTo: transportTo,
@@ -351,6 +371,11 @@ function renderEvents() {
         document.getElementById("eventTitle").value = event.title;
         document.getElementById("eventPlace").value = event.place || "";
         document.getElementById("eventNote").value = event.note || "";
+        // ===== ♡ 帶入原本的 Google Maps 網址 =====
+document.getElementById("eventMapUrl").value = event.mapUrl || "";
+// ===== ♡ 編輯時帶入社群平台與網址 =====
+document.getElementById("eventShopInfo").value = event.shopInfo || "";
+document.getElementById("eventShopPlatform").value = event.shopPlatform || "instagram";
         
 // ===== 帶入原本的交通資訊 =====
 
@@ -399,7 +424,6 @@ document.getElementById("transportRoute").value =
 
         content.appendChild(title);
         content.appendChild(place);
-        content.appendChild(note);
         
 // ===== 顯示交通資訊 =====
 
@@ -444,6 +468,68 @@ if (event.transport) {
     }
 
     content.appendChild(transportBox);
+}
+
+
+// ===== ♡ 店家／社群平台超連結 =====
+if (event.shopInfo) {
+
+    const platformNames = {
+        instagram: "Instagram",
+        facebook: "Facebook",
+        threads: "Threads",
+        website: "店家官網",
+        other: "其他連結"
+    };
+
+    try {
+        const shopUrl = new URL(event.shopInfo);
+
+        if (["https:", "http:"].includes(shopUrl.protocol)) {
+
+            const shopLink = document.createElement("a");
+
+            shopLink.href = shopUrl.href;
+            shopLink.target = "_blank";
+            shopLink.rel = "noopener noreferrer";
+            shopLink.className = "schedule-shop-link";
+
+            shopLink.textContent =
+                platformNames[event.shopPlatform] || "🔗 其他連結";
+
+            content.appendChild(shopLink);
+        }
+
+    } catch (error) {
+        console.warn("店家／社群網址格式不正確：", event.shopInfo);
+    }
+}
+
+// ===== ♡ Google Maps 地圖超連結 =====
+if (event.mapUrl) {
+    try {
+        const mapAddress = new URL(event.mapUrl);
+
+        if (["https:", "http:"].includes(mapAddress.protocol)) {
+            const mapLink = document.createElement("a");
+
+            mapLink.href = mapAddress.href;
+            mapLink.target = "_blank";
+            mapLink.rel = "noopener noreferrer";
+            mapLink.className = "schedule-map-link";
+            mapLink.textContent = "🗺️ Google Maps";
+
+            content.appendChild(mapLink);
+        }
+    } catch (error) {
+        console.warn("Google Maps 網址格式不正確：", event.mapUrl);
+    }
+}
+
+// ===== ♡ 備註顯示在交通卡片下方 =====
+if (event.note) {
+    note.classList.add("schedule-note");
+    content.appendChild(note);
 }
 
         content.appendChild(editButton);
@@ -808,29 +894,118 @@ checkbox.addEventListener("change", function () {
 
 });
 
-// 將勾選框加入打卡點
-itemDiv.appendChild(checkbox);
+// ===== ♡ 打卡勾選框與名稱對齊 =====
+const checklistTitleRow = document.createElement("div");
+checklistTitleRow.className = "checklist-title-row";
 
+checklistTitleRow.appendChild(checkbox);
+checklistTitleRow.appendChild(itemName);
 
-itemDiv.appendChild(itemName);
+itemDiv.appendChild(checklistTitleRow);
 
-// 顯示位置
-if (item.location) {
-    const locationText = document.createElement("p");
-    locationText.textContent = "♡ 位置：" + item.location;
-    itemDiv.appendChild(locationText);
+// ===== ♡ 打卡點粉嫩交通資訊 =====
+if (item.transport || item.transportTo || item.transportRoute) {
+
+    const transportBox = document.createElement("div");
+    transportBox.className = "transport-box";
+
+    const transportIcons = {
+        "步行": "🚶",
+        "捷運": "🚇",
+        "輕軌": "🚈",
+        "火車": "🚆",
+        "高鐵": "🚄",
+        "公車": "🚌",
+        "計程車": "🚕",
+        "其他": "🚗"
+    };
+
+    const transportTitle = document.createElement("div");
+    transportTitle.className = "transport-title";
+
+    transportTitle.textContent =
+        (item.transport
+            ? (transportIcons[item.transport] || "🚗") + " " + item.transport
+            : "♡ 交通資訊") +
+        (item.transportRoute ? "｜" + item.transportRoute : "");
+
+    transportBox.appendChild(transportTitle);
+
+    if (item.transportTo) {
+        const transportLocation = document.createElement("div");
+        transportLocation.className = "transport-stations";
+        transportLocation.textContent = "📍 " + item.transportTo;
+        transportBox.appendChild(transportLocation);
+    }
+
+    itemDiv.appendChild(transportBox);
 }
 
-// 顯示交通方式
-if (item.transport) {
-    const transportText = document.createElement("p");
-    transportText.textContent = "♡ 交通：" + item.transport;
-    itemDiv.appendChild(transportText);
+// ===== ♡ 打卡點店家／社群平台連結 =====
+if (item.shopInfo) {
+
+    const platformNames = {
+        instagram: "Instagram",
+        facebook: "Facebook",
+        threads: "Threads",
+        website: "店家官網",
+        other: "其他連結"
+    };
+
+    try {
+        const shopUrl = new URL(item.shopInfo);
+
+        if (["https:", "http:"].includes(shopUrl.protocol)) {
+
+            const shopLink = document.createElement("a");
+
+            shopLink.href = shopUrl.href;
+            shopLink.target = "_blank";
+            shopLink.rel = "noopener noreferrer";
+
+            // 沿用每日行程的粉嫩按鈕樣式
+            shopLink.className = "schedule-shop-link";
+
+            shopLink.textContent =
+                platformNames[item.shopPlatform] || "其他連結";
+
+            itemDiv.appendChild(shopLink);
+        }
+
+    } catch (error) {
+        console.warn("打卡點社群網址格式不正確：", item.shopInfo);
+    }
+}
+// ===== ♡ 打卡點 Google Maps 粉嫩連結 =====
+if (item.mapUrl) {
+    try {
+        const mapAddress = new URL(item.mapUrl);
+
+        if (["https:", "http:"].includes(mapAddress.protocol)) {
+
+            const mapLink = document.createElement("a");
+
+            mapLink.href = mapAddress.href;
+            mapLink.target = "_blank";
+            mapLink.rel = "noopener noreferrer";
+
+            // 沿用每日行程的粉嫩按鈕樣式
+            mapLink.className = "schedule-map-link";
+
+            mapLink.textContent = "🗺️ Google Maps";
+
+            itemDiv.appendChild(mapLink);
+        }
+
+    } catch (error) {
+        console.warn("打卡點 Google Maps 網址格式不正確：", item.mapUrl);
+    }
 }
 
-// 顯示備註
+// ===== ♡ 打卡備註獨立一行 =====
 if (item.note) {
     const noteText = document.createElement("p");
+    noteText.className = "checklist-note";
     noteText.textContent = "♡ 備註：" + item.note;
     itemDiv.appendChild(noteText);
 }
@@ -851,9 +1026,49 @@ editItemButton.addEventListener("click", function () {
 
     // 帶入原本儲存的資料
     document.getElementById("checklistItemName").value = item.name;
-    document.getElementById("checklistItemLocation").value = item.location || "";
-    document.getElementById("checklistItemTransport").value = item.transport || "";
+    // ===== ♡ 相容舊版交通資料 =====
+const transportSelect = document.getElementById("checklistItemTransport");
+
+// 移除上次編輯時暫時建立的舊資料選項
+transportSelect.querySelectorAll('option[data-legacy="true"]').forEach(function (option) {
+    option.remove();
+});
+
+const savedTransport = item.transport || "";
+
+// 如果舊交通內容不在下拉選單中，暫時加入選項
+if (
+    savedTransport &&
+    !Array.from(transportSelect.options).some(function (option) {
+        return option.value === savedTransport;
+    })
+) {
+    const legacyOption = document.createElement("option");
+    legacyOption.value = savedTransport;
+    legacyOption.textContent = "♡ 原本交通：" + savedTransport;
+    legacyOption.dataset.legacy = "true";
+
+    transportSelect.appendChild(legacyOption);
+}
+
+transportSelect.value = savedTransport;
+    // ===== ♡ 編輯時帶入交通地點與路線 =====
+document.getElementById("checklistTransportTo").value =
+    item.transportTo || "";
+
+document.getElementById("checklistTransportRoute").value =
+    item.transportRoute || "";
     document.getElementById("checklistItemNote").value = item.note || "";
+    // ===== ♡ 編輯時帶入 Google Maps 網址 =====
+document.getElementById("checklistItemMapUrl").value =
+    item.mapUrl || "";
+
+    // ===== ♡ 編輯時帶入社群平台與網址 =====
+document.getElementById("checklistItemShopPlatform").value =
+    item.shopPlatform || "instagram";
+
+document.getElementById("checklistItemShopInfo").value =
+    item.shopInfo || "";
 
     // 修改視窗標題
     document.querySelector("#checklistItemModal h2").textContent =
@@ -959,9 +1174,23 @@ addItemButton.addEventListener("click", function () {
 
     // 清空上一次輸入的內容
     document.getElementById("checklistItemName").value = "";
-    document.getElementById("checklistItemLocation").value = "";
+    // ===== ♡ 清除舊版交通暫存選項 =====
+document.querySelectorAll(
+    '#checklistItemTransport option[data-legacy="true"]'
+).forEach(function (option) {
+    option.remove();
+});
     document.getElementById("checklistItemTransport").value = "";
+    // ===== ♡ 新增打卡點時清空交通資料 =====
+document.getElementById("checklistTransportTo").value = "";
+document.getElementById("checklistTransportRoute").value = "";
     document.getElementById("checklistItemNote").value = "";
+    // ===== ♡ 新增打卡點時清空 Google Maps =====
+document.getElementById("checklistItemMapUrl").value = "";
+
+// ===== ♡ 新增打卡點時重設社群資料 =====
+document.getElementById("checklistItemShopPlatform").value = "instagram";
+document.getElementById("checklistItemShopInfo").value = "";
 
     // 開啟新增打卡點視窗
     document.getElementById("checklistItemModal").style.display = "flex";
@@ -985,9 +1214,15 @@ document.getElementById("saveChecklistItemButton")
 
         // 取得輸入的資料
         const name = document.getElementById("checklistItemName").value.trim();
-        const location = document.getElementById("checklistItemLocation").value.trim();
-        const transport = document.getElementById("checklistItemTransport").value.trim();
-        const note = document.getElementById("checklistItemNote").value.trim();
+const transport = document.getElementById("checklistItemTransport").value;
+const transportTo = document.getElementById("checklistTransportTo").value.trim();
+const transportRoute = document.getElementById("checklistTransportRoute").value.trim();
+const note = document.getElementById("checklistItemNote").value.trim();
+// ===== ♡ 取得打卡點 Google Maps 網址 =====
+const mapUrl = document.getElementById("checklistItemMapUrl").value.trim();
+// ===== ♡ 取得打卡點社群平台與網址 =====
+const shopPlatform = document.getElementById("checklistItemShopPlatform").value;
+const shopInfo = document.getElementById("checklistItemShopInfo").value.trim();
 
         // 打卡點名稱不可空白
         if (name === "") {
@@ -1020,9 +1255,13 @@ if (window.editingChecklistItemId != null) {
     }
 
     existingItem.name = name;
-    existingItem.location = location;
-    existingItem.transport = transport;
-    existingItem.note = note;
+existingItem.transport = transport;
+existingItem.transportTo = transportTo;
+existingItem.transportRoute = transportRoute;
+existingItem.note = note;
+existingItem.mapUrl = mapUrl;
+existingItem.shopPlatform = shopPlatform;
+existingItem.shopInfo = shopInfo;
 
 } else {
 
@@ -1030,10 +1269,14 @@ if (window.editingChecklistItemId != null) {
     checklist.items.push({
         id: Date.now(),
         name: name,
-        location: location,
-        transport: transport,
-        note: note,
-        completed: false
+transport: transport,
+transportTo: transportTo,
+transportRoute: transportRoute,
+note: note,
+mapUrl: mapUrl,
+shopPlatform: shopPlatform,
+shopInfo: shopInfo,
+completed: false
     });
 
 }

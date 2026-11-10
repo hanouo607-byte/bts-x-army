@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BTS X ARMY ♡ 行程規劃</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,7 +14,7 @@
 
         <header class="header">
             <div class="logo">♡ BTS X ARMY ♡</div>
-            <p>把每一天的美好都安排好</p>
+            <p>추운 겨울 끝을 지나, 다시 봄날이 올 때까지</p>
         </header>
 
         <section class="trip-card">
@@ -96,13 +97,58 @@
         <input type="text" id="checklistItemName"
                placeholder="例如：蓬萊倉庫">
 
-        <label for="checklistItemLocation">位置</label>
-        <input type="text" id="checklistItemLocation"
-               placeholder="例如：高雄市鹽埕區">
+<!-- ===== ♡ 打卡點交通資訊 ===== -->
 
-        <label for="checklistItemTransport">交通</label>
-        <input type="text" id="checklistItemTransport"
-               placeholder="例如：輕軌駁二蓬萊站">
+<label for="checklistItemTransport">交通方式</label>
+<select id="checklistItemTransport">
+    <option value="">不需要交通資訊</option>
+    <option value="步行">🚶 步行</option>
+    <option value="捷運">🚇 捷運</option>
+    <option value="輕軌">🚈 輕軌</option>
+    <option value="火車">🚆 火車</option>
+    <option value="高鐵">🚄 高鐵</option>
+    <option value="公車">🚌 公車</option>
+    <option value="計程車">🚕 計程車</option>
+    <option value="其他">🚗 其他</option>
+</select>
+
+<label for="checklistTransportTo">地點</label>
+<input
+    type="text"
+    id="checklistTransportTo"
+    placeholder="例如：巨蛋站"
+>
+
+<label for="checklistTransportRoute">交通路線</label>
+<input
+    type="text"
+    id="checklistTransportRoute"
+    placeholder="例如：高雄捷運紅線"
+>
+<!-- ===== ♡ 打卡點 Google Maps ===== -->
+<label for="checklistItemMapUrl">Google Maps</label>
+<input
+    type="url"
+    id="checklistItemMapUrl"
+    placeholder="貼上 Google Maps 網址"
+>
+<!-- ===== ♡ 打卡點店家／社群平台 ===== -->
+
+<label for="checklistItemShopPlatform">店家／社群平台</label>
+<select id="checklistItemShopPlatform">
+    <option value="instagram">Instagram</option>
+    <option value="facebook">Facebook</option>
+    <option value="threads">Threads</option>
+    <option value="website">店家官網</option>
+    <option value="other">其他連結</option>
+</select>
+
+<label for="checklistItemShopInfo">平台網址</label>
+<input
+    type="url"
+    id="checklistItemShopInfo"
+    placeholder="https://..."
+>
 
         <label for="checklistItemNote">備註</label>
         <textarea id="checklistItemNote"
@@ -175,6 +221,30 @@
         <input type="text" id="transportRoute"
         placeholder="例如：高雄捷運紅線">
 
+<!-- ===== ♡ Google Maps 地圖連結 ===== -->
+<label for="eventMapUrl">Google Maps</label>
+<input
+    type="url"
+    id="eventMapUrl"
+    placeholder="貼上 Google Maps 網址"
+>
+
+<!-- ===== ♡ 店家／社群平台 ===== -->
+<label for="eventShopPlatform">店家／社群平台</label>
+<select id="eventShopPlatform">
+    <option value="instagram">Instagram</option>
+    <option value="facebook">Facebook</option>
+    <option value="threads">Threads</option>
+    <option value="website">店家官網</option>
+    <option value="other">其他連結</option>
+</select>
+
+<label for="eventShopInfo">平台網址</label>
+<input
+    type="url"
+    id="eventShopInfo"
+    placeholder="https://..."
+>
             <label>備註</label>
             <textarea id="eventNote" placeholder="記錄一些小事情 ♡"></textarea>
 
@@ -219,7 +289,7 @@
 </div>
 
         <footer>
-            Made with ♡ by KaKa
+            Made with ♡ by KaKa @chukai.67
         </footer>
 
     </div>
