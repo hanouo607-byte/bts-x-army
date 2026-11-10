@@ -998,9 +998,13 @@ if (checklistEditMode) {
 
     const dragHandle = document.createElement("span");
 
-    dragHandle.className = "checklist-drag-handle";
-    dragHandle.textContent = "⠿";
-    dragHandle.title = "按住拖曳調整順序";
+dragHandle.className = "checklist-drag-handle";
+dragHandle.textContent = "";
+dragHandle.title = "按住拖曳調整順序";
+
+// ===== ♡ 避免手機長按出現文字選取或複製選單 =====
+dragHandle.style.webkitUserSelect = "none";
+dragHandle.style.webkitTouchCallout = "none";
 
     // ===== ♡ 只有按住把手才能開始拖曳 =====
 // ===== ♡ 拖曳時讓整張打卡點卡片一起移動 =====
@@ -1009,7 +1013,13 @@ itemDiv.draggable = true;
 // 只有按住右上角把手才能拖曳
 itemDiv.draggable = false;
 
-dragHandle.addEventListener("mousedown", function () {
+// ===== ♡ 只有滑鼠操作才啟用電腦原生拖曳 =====
+dragHandle.addEventListener("mousedown", function (event) {
+    if (event.button !== 0) return;
+
+    // 手機觸控不啟用 HTML 原生拖曳
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+
     itemDiv.draggable = true;
 });
 
@@ -1026,7 +1036,92 @@ dragHandle.addEventListener("mouseup", function () {
     itemDiv.draggable = false;
 });
 
-    itemDiv.appendChild(dragHandle);
+// ===== ♡ 手機觸控拖曳排序 =====
+let touchStartY = 0;
+let touchTargetItem = null;
+
+dragHandle.addEventListener("touchstart", function (event) {
+    if (event.touches.length !== 1) return;
+
+    touchStartY = event.touches[0].clientY;
+    touchTargetItem = null;
+
+    itemDiv.classList.add("checklist-touch-dragging");
+}, { passive: true });
+
+dragHandle.addEventListener("touchmove", function (event) {
+    if (event.touches.length !== 1) return;
+
+    event.preventDefault();
+
+    const touch = event.touches[0];
+    const moveY = touch.clientY - touchStartY;
+
+    itemDiv.style.transform = `translateY(${moveY}px)`;
+    itemDiv.style.zIndex = "100";
+
+    itemDiv.style.pointerEvents = "none";
+
+    const target = document.elementFromPoint(
+        touch.clientX,
+        touch.clientY
+    );
+
+    itemDiv.style.pointerEvents = "";
+
+    touchTargetItem = target?.closest(".checklist-item") || null;
+}, { passive: false });
+
+dragHandle.addEventListener("touchend", function () {
+    itemDiv.style.transform = "";
+    itemDiv.style.zIndex = "";
+    itemDiv.classList.remove("checklist-touch-dragging");
+
+    if (!touchTargetItem || touchTargetItem === itemDiv) {
+        touchTargetItem = null;
+        return;
+    }
+
+    const fromIndex = checklist.items.findIndex(function (savedItem) {
+        return savedItem.id === item.id;
+    });
+
+    const toIndex = Array.from(
+        card.querySelectorAll(".checklist-item")
+    ).indexOf(touchTargetItem);
+
+    if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
+        touchTargetItem = null;
+        return;
+    }
+
+    const movedItem = checklist.items.splice(fromIndex, 1)[0];
+    checklist.items.splice(toIndex, 0, movedItem);
+
+    try {
+        localStorage.setItem(
+            "pinkPlannerChecklists",
+            JSON.stringify(checklists)
+        );
+    } catch (error) {
+        checklist.items.splice(toIndex, 1);
+        checklist.items.splice(fromIndex, 0, movedItem);
+
+        alert("♡ 排序儲存失敗，原本順序已保留！");
+    }
+
+    touchTargetItem = null;
+    renderChecklists();
+});
+
+dragHandle.addEventListener("touchcancel", function () {
+    itemDiv.style.transform = "";
+    itemDiv.style.zIndex = "";
+    itemDiv.classList.remove("checklist-touch-dragging");
+    touchTargetItem = null;
+});
+
+itemDiv.appendChild(dragHandle);
 }
 
 // 建立打卡勾選框

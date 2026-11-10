@@ -2098,3 +2098,23 @@ z-index: 2;
 .checklist-drag-handle:active {
     cursor: grabbing;
 }
+/* ===== ♡ 手機打卡點拖曳支援 ===== */
+.checklist-drag-handle {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* ===== ♡ 手機拖曳把手避免文字選取 ===== */
+.checklist-drag-handle {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    touch-action: none !important;
+}
+
+.checklist-drag-handle::before {
+    content: "⠿";
+    pointer-events: none;
+}
