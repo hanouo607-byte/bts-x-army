@@ -886,6 +886,15 @@ const resolvedItems = await Promise.all(
 
 
 for (const { item, position } of resolvedItems) {
+    alert(
+    "♡ 手機 BTS 座標檢查\n" +
+    resolvedItems.map(function (result) {
+        return result.item.name + "：" +
+            (Array.isArray(result.position)
+                ? JSON.stringify(result.position)
+                : "座標解析失敗");
+    }).join("\n")
+);
 
         // ===== ♡ 無效座標只跳過該打卡點 =====
     if (
