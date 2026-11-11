@@ -2136,3 +2136,13 @@ z-index: 2;
         touch-action: manipulation;
     }
 }
+
+/* ===== ♡ 防止 iPhone Safari 輸入時自動放大 ===== */
+@supports (-webkit-touch-callout: none) {
+    input,
+    textarea,
+    select {
+        font-size: 16px !important;
+        -webkit-text-size-adjust: 100%;
+    }
+}
