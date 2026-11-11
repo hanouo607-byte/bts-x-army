@@ -1256,7 +1256,7 @@ if (item.mapUrl) {
 }
 
 // ===== ♡ 打卡點圖片按鈕 =====
-if (item.image) {
+if (item.image || item.imageId) {
 
     const imageButton = document.createElement("button");
 
@@ -1271,7 +1271,22 @@ if (item.image) {
             "checklistImagePreview"
         );
 
-        imagePreview.src = item.image;
+        loadChecklistPhoto(item)
+    .then(function (photo) {
+        if (!photo) {
+            alert("♡ 找不到照片，請確認圖片是否已儲存");
+            return;
+        }
+
+        imagePreview.src = photo;
+        document.getElementById(
+    "checklistImageModal"
+).style.display = "flex";
+    })
+    .catch(function (error) {
+        console.error("照片讀取失敗：", error);
+        alert("♡ 照片讀取失敗，請稍後再試");
+    });
 
         document.getElementById(
             "checklistImageModal"
@@ -1369,12 +1384,32 @@ const existingImage = document.getElementById(
 // 清空上次選擇的檔案，避免誤用舊圖片
 document.getElementById("checklistItemImage").value = "";
 
-if (item.image) {
-    existingImage.src = item.image;
-    existingImageBox.style.display = "block";
-} else {
-    existingImage.removeAttribute("src");
-    existingImageBox.style.display = "none";
+// ===== ♡ 同時預覽舊照片與 IndexedDB 照片 =====
+existingImage.removeAttribute("src");
+existingImageBox.style.display = "none";
+
+if (item.image || item.imageId) {
+
+    loadChecklistPhoto(item)
+        .then(function (photo) {
+
+            // 避免照片讀取期間切換到其他打卡點
+            if (
+                window.activeChecklistId !== checklist.id ||
+                window.editingChecklistItemId !== item.id
+            ) {
+                return;
+            }
+
+            if (photo) {
+                existingImage.src = photo;
+                existingImageBox.style.display = "block";
+            }
+
+        })
+        .catch(function (error) {
+            console.error("編輯照片預覽失敗：", error);
+        });
 }
 
     // 修改視窗標題
@@ -1579,31 +1614,58 @@ existingItem.note = note;
 existingItem.mapUrl = mapUrl;
 existingItem.shopPlatform = shopPlatform;
 existingItem.shopInfo = shopInfo;
-// ===== ♡ 儲存照片新增、更換或刪除 =====
+// ===== ♡ 編輯打卡點照片：改存 IndexedDB =====
 if (imageData !== null) {
-    // 有選擇新照片：儲存新照片
-    existingItem.image = imageData;
+
+    try {
+        // 先確認新照片成功存進 IndexedDB
+        await savePinkPlannerPhoto(existingItem.id, imageData);
+
+        // 成功後才更新照片參照
+        existingItem.imageId = existingItem.id;
+        existingItem.image = null;
+
+    } catch (error) {
+        console.error("照片儲存失敗：", error);
+        alert("♡ 新照片儲存失敗，原本照片已保留！");
+        return;
+    }
 
 } else if (checklistImageMarkedForDeletion) {
-    // 有按 × 且沒有選新照片：刪除舊照片
+
+    // 先取消照片顯示，暫時不刪除資料庫中的照片
     existingItem.image = null;
+    existingItem.imageId = null;
 }
 
 } else {
 
-    // 新增打卡點
+    // ===== ♡ 新增打卡點：照片存入 IndexedDB =====
+    const newItemId = Date.now();
+
+    if (imageData !== null) {
+        try {
+            await savePinkPlannerPhoto(newItemId, imageData);
+        } catch (error) {
+            console.error("照片儲存失敗：", error);
+            alert("♡ 照片儲存失敗，請重試！");
+            return;
+        }
+    }
+
     checklist.items.push({
-        id: Date.now(),
+        id: newItemId,
         name: name,
-transport: transport,
-transportTo: transportTo,
-transportRoute: transportRoute,
-note: note,
-mapUrl: mapUrl,
-shopPlatform: shopPlatform,
-shopInfo: shopInfo,
-image: imageData,
-completed: false
+        transport: transport,
+        transportTo: transportTo,
+        transportRoute: transportRoute,
+        note: note,
+        mapUrl: mapUrl,
+        shopPlatform: shopPlatform,
+        shopInfo: shopInfo,
+        image: null,
+        imageId: imageData !== null ? newItemId : null,
+        completed: false
     });
 
 }
@@ -1687,9 +1749,112 @@ closeChecklistImageButton.addEventListener("click", function () {
     checklistImageModal.style.display = "none";
 });
 
-// ===== ♡ 將打卡點圖片縮小後轉成可儲存格式 =====
+// ===== ♡ PinkPlanner 照片專用 IndexedDB =====
+const pinkPlannerImageDB = "PinkPlannerImages";
+
+function openPinkPlannerImageDB() {
+    return new Promise(function (resolve, reject) {
+
+        const request = indexedDB.open(pinkPlannerImageDB, 1);
+
+        request.onupgradeneeded = function () {
+            const db = request.result;
+
+            if (!db.objectStoreNames.contains("photos")) {
+                db.createObjectStore("photos");
+            }
+        };
+
+        request.onsuccess = function () {
+            resolve(request.result);
+        };
+
+        request.onerror = function () {
+            reject(request.error);
+        };
+    });
+}
+
+// ===== ♡ 將照片儲存到 IndexedDB =====
+async function savePinkPlannerPhoto(photoId, imageData) {
+
+    const db = await openPinkPlannerImageDB();
+
+    return new Promise(function (resolve, reject) {
+
+        const transaction = db.transaction("photos", "readwrite");
+        const store = transaction.objectStore("photos");
+
+        store.put(imageData, String(photoId));
+
+        transaction.oncomplete = function () {
+            db.close();
+            resolve();
+        };
+
+        transaction.onerror = function () {
+            db.close();
+            reject(transaction.error || new Error("照片儲存失敗"));
+        };
+
+        transaction.onabort = function () {
+            db.close();
+            reject(transaction.error || new Error("照片儲存中止"));
+        };
+    });
+}
+
+// ===== ♡ 從 IndexedDB 讀取照片 =====
+async function getPinkPlannerPhoto(photoId) {
+
+    const db = await openPinkPlannerImageDB();
+
+    return new Promise(function (resolve, reject) {
+
+        const transaction = db.transaction("photos", "readonly");
+        const store = transaction.objectStore("photos");
+
+        const request = store.get(String(photoId));
+
+        request.onsuccess = function () {
+            resolve(request.result || null);
+        };
+
+        request.onerror = function () {
+            reject(request.error);
+        };
+
+        transaction.oncomplete = function () {
+            db.close();
+        };
+
+        transaction.onerror = function () {
+            db.close();
+        };
+    });
+}
+
+// ===== ♡ 同時支援舊照片與 IndexedDB 新照片 =====
+async function loadChecklistPhoto(item) {
+
+    // 舊照片：直接使用原本儲存的圖片
+    if (item.image) {
+        return item.image;
+    }
+
+    // 新照片：從 IndexedDB 讀取
+    if (item.imageId) {
+        return await getPinkPlannerPhoto(item.imageId);
+    }
+
+    // 沒有照片
+    return null;
+}
+
+// ===== ♡ 打卡點照片強力壓縮：目標每張 15 KB 以下 =====
 function resizeChecklistImage(file) {
     return new Promise(function (resolve, reject) {
+
         if (!file || !file.type.startsWith("image/")) {
             reject(new Error("請選擇圖片檔案"));
             return;
@@ -1701,21 +1866,86 @@ function resizeChecklistImage(file) {
             const image = new Image();
 
             image.onload = function () {
-                const canvas = document.createElement("canvas");
-                const maxSize = 600;
+                try {
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
 
-                const scale = Math.min(
-                    1,
-                    maxSize / Math.max(image.width, image.height)
-                );
+                    if (!ctx) {
+                        reject(new Error("無法建立圖片壓縮工具"));
+                        return;
+                    }
 
-                canvas.width = Math.round(image.width * scale);
-                canvas.height = Math.round(image.height * scale);
+                    // 強力壓縮：最多 400 px
+                    let maxSize = 400;
 
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    // JPEG 畫質從 35% 開始
+                    let quality = 0.35;
 
-                resolve(canvas.toDataURL("image/jpeg", 0.5));
+                    // 每張照片的 Base64 資料目標不超過 15 KB
+                    const targetBytes = 15 * 1024;
+
+                    let result = "";
+
+                    // 逐步降低尺寸及畫質
+                    for (let attempt = 0; attempt < 12; attempt++) {
+
+                        const scale = Math.min(
+                            1,
+                            maxSize / Math.max(image.width, image.height)
+                        );
+
+                        canvas.width = Math.max(
+                            1,
+                            Math.round(image.width * scale)
+                        );
+
+                        canvas.height = Math.max(
+                            1,
+                            Math.round(image.height * scale)
+                        );
+
+                        // 白色背景，避免透明圖片變黑
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillRect(
+                            0, 0,
+                            canvas.width,
+                            canvas.height
+                        );
+
+                        ctx.drawImage(
+                            image,
+                            0, 0,
+                            canvas.width,
+                            canvas.height
+                        );
+
+                        result = canvas.toDataURL(
+                            "image/jpeg",
+                            quality
+                        );
+
+                        // 計算實際 Base64 文字大小
+                        const dataSize = new Blob([result]).size;
+
+                        if (dataSize <= targetBytes) {
+                            break;
+                        }
+
+                        // 如果仍然太大，繼續縮小
+                        maxSize = Math.max(80, Math.round(maxSize * 0.8));
+                        quality = Math.max(0.15, quality - 0.03);
+                    }
+
+                    if (new Blob([result]).size > targetBytes) {
+                        reject(new Error("圖片無法壓縮到 15 KB 以下"));
+                        return;
+                    }
+
+                    resolve(result);
+
+                } catch (error) {
+                    reject(error);
+                }
             };
 
             image.onerror = function () {
@@ -1732,6 +1962,7 @@ function resizeChecklistImage(file) {
         reader.readAsDataURL(file);
     });
 }
+
 // ===== ♡ 選擇打卡點圖片時立即預覽 =====
 document.getElementById("checklistItemImage")
     .addEventListener("change", function () {
