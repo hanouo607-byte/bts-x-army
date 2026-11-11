@@ -2306,6 +2306,84 @@ async function loadChecklistPhoto(item) {
     return null;
 }
 
+// ===== ♡ 安全搬移舊照片到 IndexedDB =====
+async function migrateOldChecklistPhotos() {
+
+    const saved = localStorage.getItem("pinkPlannerChecklists");
+
+    if (!saved) return;
+
+    let groups;
+
+    try {
+        groups = JSON.parse(saved);
+    } catch (error) {
+        console.error("打卡清單資料解析失敗：", error);
+        return;
+    }
+
+    let movedCount = 0;
+
+    for (const group of groups) {
+        for (const item of (group.items || [])) {
+
+            if (!item.image) continue;
+
+            try {
+                const photoId = String(item.id);
+
+                // 先儲存舊照片
+                await savePinkPlannerPhoto(photoId, item.image);
+
+                // 確認新位置可以讀取
+                const savedPhoto = await getPinkPlannerPhoto(photoId);
+
+                if (savedPhoto !== item.image) {
+                    throw new Error("照片驗證失敗");
+                }
+
+                // 確認成功後，才從清單移除大型圖片字串
+                const originalImage = item.image;
+                const originalImageId = item.imageId;
+
+                item.image = null;
+                item.imageId = item.id;
+
+                try {
+                    localStorage.setItem(
+                        "pinkPlannerChecklists",
+                        JSON.stringify(groups)
+                    );
+
+                    movedCount++;
+
+                } catch (error) {
+                    // 寫入失敗時恢復原本資料
+                    item.image = originalImage;
+                    item.imageId = originalImageId;
+                    throw error;
+                }
+
+            } catch (error) {
+                console.error("舊照片搬移失敗：", item.name, error);
+            }
+        }
+    }
+
+    // 重新載入最新清單
+    checklists = JSON.parse(
+        localStorage.getItem("pinkPlannerChecklists") || "[]"
+    );
+
+    renderChecklists();
+
+    alert(
+        movedCount > 0
+            ? "♡ 已安全搬移 " + movedCount + " 張舊照片！"
+            : "♡ 沒有需要搬移的舊照片，或搬移未成功。"
+    );
+}
+
 // ===== ♡ 打卡點照片強力壓縮：目標每張 15 KB 以下 =====
 function resizeChecklistImage(file) {
     return new Promise(function (resolve, reject) {
@@ -2630,6 +2708,43 @@ console.table(getChecklistMapItems());
     });
 
     document.body.appendChild(backupButton);
+})();
+
+// ===== ♡ 手動搬移舊照片按鈕 =====
+(function () {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.textContent = "📷 搬移舊照片";
+
+    button.style.cssText = `
+        display: block;
+        margin: 20px auto;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 20px;
+        background: #f5b8d6;
+        color: #713c5c;
+        font-weight: bold;
+        cursor: pointer;
+    `;
+
+    button.addEventListener("click", async function () {
+        button.disabled = true;
+        button.textContent = "♡ 照片搬移中...";
+
+        try {
+            await migrateOldChecklistPhotos();
+        } catch (error) {
+            console.error("照片搬移失敗：", error);
+            alert("♡ 搬移失敗，請先保留原本資料！");
+        } finally {
+            button.disabled = false;
+            button.textContent = "📷 搬移舊照片";
+        }
+    });
+
+    document.body.appendChild(button);
 })();
 
 // 網頁載入時顯示已儲存的清單
