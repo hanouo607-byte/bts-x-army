@@ -2211,15 +2211,16 @@ z-index: 2;
     border-radius: 8px;
     background: #FFFFFF;
 
-    font-size: 10px !important;
-    /* ===== ♡ iPhone ARMY 網址輸入框防止自動放大 ===== */
+font-size: 10px !important;
+font-weight: normal;
+outline: none;
+}
+
+/* ===== ♡ iPhone ARMY 網址輸入框防止自動放大 ===== */
 @media (max-width: 768px) {
     #armyLocationUrl {
         font-size: 16px !important;
     }
-}
-    font-weight: normal;
-    outline: none;
 }
 
 #armyLocationUrl:focus {

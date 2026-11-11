@@ -767,8 +767,15 @@ localStorage.setItem(
 /* ===== ♡ PinkPlanner 地圖初始化 ===== */
 
 let checklistMap = null;
+let checklistMapLoading = false;
 
 async function initChecklistMap() {
+    if (checklistMapLoading) {
+    return;
+}
+
+checklistMapLoading = true;
+try {
 
     // 確認 Leaflet 已載入
     if (typeof L === "undefined") {
@@ -854,17 +861,33 @@ if (savedArmyCoords && !window.armyLocationMarker) {
 
     // 讀取打卡清單
     const mapItems = getChecklistMapItems();
-
     const markerPositions = [];
 
-    for (const item of mapItems) {
+// ===== ♡ 同時解析所有 BTS 打卡點 =====
+const resolvedItems = await Promise.all(
+    mapItems.map(async function (item) {
+        try {
+            const position = await resolveChecklistMapUrl(item.mapUrl);
+            return { item, position };
+        } catch (error) {
+            console.warn("BTS 地點解析失敗：", item.name, error);
+            return { item, position: null };
+        }
+    })
+);
 
-const autoPosition = await resolveChecklistMapUrl(item.mapUrl);
 
-const position = autoPosition;
+for (const { item, position } of resolvedItems) {
 
-        // 暫時跳過還沒有座標的地點
-        if (!position) continue;
+        // ===== ♡ 無效座標只跳過該打卡點 =====
+    if (
+        !Array.isArray(position) ||
+        position.length !== 2 ||
+        !Number.isFinite(position[0]) ||
+        !Number.isFinite(position[1])
+    ) {
+        continue;
+    }
 
 const markerColor = item.completed
     ? "#9864C8"   // 已完成：紫色
@@ -950,8 +973,10 @@ statusText.textContent = item.completed
         marker.bindPopup(popup);
 
 markerPositions.push(position);
+console.log("♡ BTS 標記已加入：", item.name);
 
 }
+
 
     // 自動調整範圍，讓所有標記都看得到
     if (markerPositions.length > 1) {
@@ -961,12 +986,21 @@ markerPositions.push(position);
             maxZoom: 15
         });
 
-    } else if (markerPositions.length === 1) {
+        } else if (markerPositions.length === 1) {
 
         checklistMap.setView(markerPositions[0], 15);
 
     }
+
+} catch (error) {
+    console.error("♡ BTS 地圖載入失敗：", error);
+} finally {
+    // ===== ♡ BTS 地圖載入完成或失敗，都解除鎖定 =====
+    checklistMapLoading = false;
 }
+}
+
+
 
 /* ===== PinkPlanner 主分頁切換與記憶 ===== */
 
@@ -2369,9 +2403,24 @@ async function resolveChecklistMapUrl(mapUrl) {
     try {
         const cached = localStorage.getItem(cacheKey);
 
-        if (cached) {
-            return JSON.parse(cached);
+if (cached) {
+    try {
+        const coords = JSON.parse(cached);
+
+        if (
+            Array.isArray(coords) &&
+            coords.length === 2 &&
+            Number.isFinite(coords[0]) &&
+            Number.isFinite(coords[1])
+        ) {
+            return coords;
         }
+
+        console.warn("BTS 座標快取無效，重新解析網址");
+    } catch (error) {
+        console.warn("BTS 座標快取格式錯誤：", error);
+    }
+}
 
         const requestUrl =
             MAP_RESOLVER_URL +
