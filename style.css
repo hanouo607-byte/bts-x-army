@@ -2212,6 +2212,12 @@ z-index: 2;
     background: #FFFFFF;
 
     font-size: 10px !important;
+    /* ===== ♡ iPhone ARMY 網址輸入框防止自動放大 ===== */
+@media (max-width: 768px) {
+    #armyLocationUrl {
+        font-size: 16px !important;
+    }
+}
     font-weight: normal;
     outline: none;
 }

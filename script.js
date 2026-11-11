@@ -864,7 +864,7 @@ const autoPosition = await resolveChecklistMapUrl(item.mapUrl);
 const position = autoPosition;
 
         // 暫時跳過還沒有座標的地點
-        if (!position) return;
+        if (!position) continue;
 
 const markerColor = item.completed
     ? "#9864C8"   // 已完成：紫色
