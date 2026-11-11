@@ -680,12 +680,95 @@ function loadTripData() {
     document.getElementById("tripEndDate").value = tripData.endDate;
 }
 
+// ===== ♡ ARMY 網址定位功能 =====
+// ===== ♡ 恢復上次儲存的 ARMY 位置網址 =====
+const savedArmyLocationUrl = localStorage.getItem("pinkPlannerArmyLocationUrl");
+
+if (savedArmyLocationUrl) {
+    document.getElementById("armyLocationUrl").value = savedArmyLocationUrl;
+}
+
+document.getElementById("armyLocationButton")
+    .addEventListener("click", async function () {
+
+        const url = document.getElementById("armyLocationUrl").value.trim();
+
+        if (!url) {
+            alert("♡ 請先貼上 Google Maps 位置網址");
+            return;
+        }
+
+        // 沿用原本的 Google Maps 網址解析功能
+        const position = await resolveChecklistMapUrl(url);
+
+        if (!position) {
+            alert("♡ 無法取得位置，請確認 Google Maps 網址");
+            return;
+        }
+
+        // ===== ♡ 記住 ARMY 位置網址 =====
+localStorage.setItem("pinkPlannerArmyLocationUrl", url);
+
+        // 確保地圖已建立
+        if (!checklistMap) {
+            await initChecklistMap();
+        }
+
+        // 將地圖移動到指定位置
+        checklistMap.setView(position, 17);
+        // ===== ♡ ARMY 專屬位置標記 =====
+
+// 清除上一次的 ARMY 標記
+if (window.armyLocationMarker) {
+    checklistMap.removeLayer(window.armyLocationMarker);
+}
+
+const armyIcon = L.divIcon({
+    className: "",
+    html: `
+        <div style="
+            width: 18px;
+            height: 18px;
+            background: #F5A6D5;
+            border: 2px solid #B43B85;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            box-shadow: 0 0 0 3px rgba(245,166,213,0.25),
+                        0 2px 5px rgba(120,50,100,0.3);
+        ">
+            <span style="
+                color: #6D2352;
+                font-size: 6px;
+                font-weight: bold;
+                line-height: 1;
+            ">ARMY</span>
+        </div>
+    `,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
+});
+
+window.armyLocationMarker = L.marker(position, {
+    icon: armyIcon
+}).addTo(checklistMap);
+
+window.armyLocationMarker.bindPopup("💜 ARMY ♡ 我的位置");
+// ===== ♡ 記住 ARMY 標記座標 =====
+localStorage.setItem(
+    "pinkPlannerArmyLocationCoords",
+    JSON.stringify(position)
+);
+
+    });
 
 /* ===== ♡ PinkPlanner 地圖初始化 ===== */
 
 let checklistMap = null;
 
-function initChecklistMap() {
+async function initChecklistMap() {
 
     // 確認 Leaflet 已載入
     if (typeof L === "undefined") {
@@ -710,44 +793,145 @@ function initChecklistMap() {
     // 更新地圖大小
     checklistMap.invalidateSize();
 
-    // 移除舊的打卡標記，保留地圖底圖
-    checklistMap.eachLayer(function (layer) {
-        if (layer instanceof L.CircleMarker) {
-            checklistMap.removeLayer(layer);
-        }
-    });
+checklistMap.eachLayer(function (layer) {
+    if (
+        layer instanceof L.Marker &&
+        layer !== window.armyLocationMarker
+    ) {
+        checklistMap.removeLayer(layer);
+    }
+});
 
-    // ===== ♡ 目前兩筆測試地點的座標 =====
-    const testLocations = {
-        "414": [22.665173, 120.302745],
-        "22245": [22.6208818, 120.2806123]
-    };
+// ===== ♡ 自動恢復 ARMY 位置標記 =====
+const savedArmyCoords = localStorage.getItem(
+    "pinkPlannerArmyLocationCoords"
+);
+
+if (savedArmyCoords && !window.armyLocationMarker) {
+    try {
+        const savedPosition = JSON.parse(savedArmyCoords);
+
+        const armyIcon = L.divIcon({
+            className: "",
+            html: `
+                <div style="
+                    width: 18px;
+                    height: 18px;
+                    background: #F5A6D5;
+                    border: 2px solid #B43B85;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-sizing: border-box;
+                    box-shadow: 0 0 0 3px rgba(245,166,213,0.25),
+                                0 2px 5px rgba(120,50,100,0.3);
+                ">
+                    <span style="
+                        color: #6D2352;
+                        font-size: 6px;
+                        font-weight: bold;
+                        line-height: 1;
+                    ">ARMY</span>
+                </div>
+            `,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
+        });
+
+        window.armyLocationMarker = L.marker(savedPosition, {
+            icon: armyIcon
+        }).addTo(checklistMap);
+
+        window.armyLocationMarker.bindPopup(
+            "💜 ARMY ♡ 我的位置"
+        );
+
+    } catch (error) {
+        console.error("ARMY 位置恢復失敗：", error);
+    }
+}
 
     // 讀取打卡清單
     const mapItems = getChecklistMapItems();
 
     const markerPositions = [];
 
-    mapItems.forEach(function (item) {
+    for (const item of mapItems) {
 
-        const position = testLocations[item.name];
+const autoPosition = await resolveChecklistMapUrl(item.mapUrl);
+
+const position = autoPosition;
 
         // 暫時跳過還沒有座標的地點
         if (!position) return;
 
-        const markerColor = item.completed
-            ? "#9864C8"   // 已完成：紫色
-            : "#EAA1C5";  // 未完成：粉紅色
+const markerColor = item.completed
+    ? "#9864C8"   // 已完成：紫色
+    : "#A0A0A0";  // 未完成：灰色
 
-        const marker = L.circleMarker(position, {
-            radius: 11,
-            color: markerColor,
-            fillColor: markerColor,
-            fillOpacity: 0.9,
-            weight: 2
-        });
+let marker;
 
-        marker.addTo(checklistMap);
+if (item.completed) {
+const btsIcon = L.divIcon({
+    className: "",
+    html: `
+        <div style="
+            width: 18px;
+            height: 18px;
+            background: #9864C8;
+            border: 2px solid #664198;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        ">
+            <svg width="11" height="11" viewBox="0 0 32 32">
+                <path d="M3 4 L14 8 L14 27 L3 30 Z"
+                      fill="white"/>
+                <path d="M18 8 L29 4 L29 30 L18 27 Z"
+                      fill="white"/>
+            </svg>
+        </div>
+    `,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
+});
+
+    marker = L.marker(position, { icon: btsIcon });
+
+} else {
+    const btsIconGray = L.divIcon({
+        className: "",
+        html: `
+            <div style="
+                width: 18px;
+                height: 18px;
+                background: #A0A0A0;
+                border: 2px solid #666666;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+            ">
+                <svg width="11" height="11" viewBox="0 0 32 32">
+                    <path d="M3 4 L14 8 L14 27 L3 30 Z"
+                          fill="white"/>
+                    <path d="M18 8 L29 4 L29 30 L18 27 Z"
+                          fill="white"/>
+                </svg>
+            </div>
+        `,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+    });
+
+    marker = L.marker(position, { icon: btsIconGray });
+}
+
+marker.addTo(checklistMap);
 
         // 點擊標記顯示打卡點名稱與狀態
         const popup = document.createElement("div");
@@ -756,18 +940,18 @@ function initChecklistMap() {
         nameText.textContent = item.name;
 
         const statusText = document.createElement("div");
-        statusText.textContent = item.completed
-            ? "💜 已完成"
-            : "💗 未完成";
+statusText.textContent = item.completed
+    ? "💜 已完成"
+    : "✕ 未完成";
 
         popup.appendChild(nameText);
         popup.appendChild(statusText);
 
         marker.bindPopup(popup);
 
-        markerPositions.push(position);
+markerPositions.push(position);
 
-    });
+}
 
     // 自動調整範圍，讓所有標記都看得到
     if (markerPositions.length > 1) {
@@ -856,7 +1040,11 @@ const savedMainTab =
 switchMainTab(savedMainTab);
 
 if (savedMainTab === "map") {
-    initChecklistMap();
+    window.addEventListener("load", function () {
+        setTimeout(function () {
+            initChecklistMap();
+        }, 100);
+    });
 }
 
 
