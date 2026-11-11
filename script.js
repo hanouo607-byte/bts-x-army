@@ -861,6 +861,14 @@ if (savedArmyCoords && !window.armyLocationMarker) {
 
     // 讀取打卡清單
     const mapItems = getChecklistMapItems();
+    alert(
+    "♡ 手機 BTS 資料檢查\n" +
+    "打卡點數量：" + mapItems.length + "\n" +
+    "清單總數：" +
+    checklists.reduce(function (total, group) {
+        return total + group.items.length;
+    }, 0)
+);
     const markerPositions = [];
 
 // ===== ♡ 同時解析所有 BTS 打卡點 =====
