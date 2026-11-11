@@ -1,6 +1,13 @@
 const MAP_RESOLVER_URL =
     "https://pinkplanner-map-resolver.hanouo-607.workers.dev/";
+// ===== ♡ BTS 打卡點備用座標 =====
+// Cloudflare 無法連線時，也能顯示已確認的地點
 
+const BTS_FALLBACK_COORDS = {
+    "542": [22.6208818, 120.2806123],
+    "545": [22.665173, 120.302745],
+    "88": [22.6644019, 120.3023508]
+};
 // ===== ♡ 全站共用編輯模式 =====
 let globalEditMode = false;
 
@@ -861,21 +868,38 @@ if (savedArmyCoords && !window.armyLocationMarker) {
 
     // 讀取打卡清單
     const mapItems = getChecklistMapItems();
-    alert(
-    "♡ 手機 BTS 資料檢查\n" +
-    "打卡點數量：" + mapItems.length + "\n" +
-    "清單總數：" +
-    checklists.reduce(function (total, group) {
-        return total + group.items.length;
-    }, 0)
-);
     const markerPositions = [];
 
 // ===== ♡ 同時解析所有 BTS 打卡點 =====
 const resolvedItems = await Promise.all(
     mapItems.map(async function (item) {
         try {
-            const position = await resolveChecklistMapUrl(item.mapUrl);
+            // ===== ♡ 優先使用打卡點已儲存的座標 =====
+let position = null;
+// ===== ♡ BTS 備用座標 =====
+const fallbackPosition = BTS_FALLBACK_COORDS[String(item.name).trim()] || null;
+
+const latitude = Number(item.latitude);
+const longitude = Number(item.longitude);
+
+if (
+    item.latitude != null &&
+    item.longitude != null &&
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180
+) {
+    position = [latitude, longitude];
+} else if (fallbackPosition) {
+    // ♡ 使用 BTS 備用座標，不需要 Cloudflare
+    position = fallbackPosition;
+} else {
+    // ♡ 其他尚未有座標的打卡點
+    position = await resolveChecklistMapUrl(item.mapUrl);
+}
             return { item, position };
         } catch (error) {
             console.warn("BTS 地點解析失敗：", item.name, error);
@@ -884,18 +908,7 @@ const resolvedItems = await Promise.all(
     })
 );
 
-
 for (const { item, position } of resolvedItems) {
-    alert(
-    "♡ 手機 BTS 座標檢查\n" +
-    resolvedItems.map(function (result) {
-        return result.item.name + "：" +
-            (Array.isArray(result.position)
-                ? JSON.stringify(result.position)
-                : "座標解析失敗");
-    }).join("\n")
-);
-
         // ===== ♡ 無效座標只跳過該打卡點 =====
     if (
         !Array.isArray(position) ||
@@ -2393,12 +2406,16 @@ function getChecklistMapItems() {
             // 只讀取有 Google Maps 網址的打卡點
             if (!item.mapUrl) return;
 
-            mapItems.push({
-                id: item.id,
-                name: item.name,
-                mapUrl: item.mapUrl,
-                completed: item.completed === true
-            });
+mapItems.push({
+    id: item.id,
+    name: item.name,
+    mapUrl: item.mapUrl,
+    completed: item.completed === true,
+
+    // ♡ 保留打卡點已儲存的座標
+    latitude: item.latitude,
+    longitude: item.longitude
+});
 
         });
 
