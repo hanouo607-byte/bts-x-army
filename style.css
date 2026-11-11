@@ -2118,3 +2118,21 @@ z-index: 2;
     content: "⠿";
     pointer-events: none;
 }
+
+/* ===== ♡ iPhone 防止編輯輸入時自動放大 ===== */
+@media screen and (max-width: 768px) {
+
+    input,
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+
+    /* 避免快速點擊觸發雙擊放大 */
+    button,
+    a,
+    .checklist-item,
+    .checklist-drag-handle {
+        touch-action: manipulation;
+    }
+}
