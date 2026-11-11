@@ -2490,10 +2490,17 @@ if (
 
         return coords;
 
-    } catch (error) {
-        console.warn("無法取得地圖座標：", error);
-        return null;
-    }
+} catch (error) {
+    console.warn("無法取得地圖座標：", error);
+
+    alert(
+        "♡ Google Maps 網址解析發生例外\n" +
+        "錯誤名稱：" + (error.name || "未知") + "\n" +
+        "錯誤訊息：" + (error.message || String(error))
+    );
+
+    return null;
+}
 }
 
 console.table(getChecklistMapItems());
