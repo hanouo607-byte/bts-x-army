@@ -2446,20 +2446,36 @@ if (cached) {
 
         const response = await fetch(requestUrl);
 
-        if (!response.ok) {
-            console.warn("地圖網址解析失敗：", response.status);
-            return null;
-        }
+if (!response.ok) {
+    console.warn("地圖網址解析失敗：", response.status);
+
+    alert(
+        "♡ BTS 網址解析服務錯誤\n" +
+        "HTTP 狀態碼：" + response.status
+    );
+
+    return null;
+}
 
         const result = await response.json();
 
-        if (
-            result.success !== true ||
-            !Number.isFinite(result.latitude) ||
-            !Number.isFinite(result.longitude)
-        ) {
-            return null;
-        }
+if (
+    result.success !== true ||
+    !Number.isFinite(result.latitude) ||
+    !Number.isFinite(result.longitude)
+) {
+    console.warn("♡ BTS 座標解析結果：", result);
+
+    alert(
+        "♡ BTS 座標解析失敗\n" +
+        "success：" + result.success + "\n" +
+        "原因：" + (result.error || result.message || "未提供錯誤原因") + "\n" +
+        "緯度：" + result.latitude + "\n" +
+        "經度：" + result.longitude
+    );
+
+    return null;
+}
 
         const coords = [
             result.latitude,
