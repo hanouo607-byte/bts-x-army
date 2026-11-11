@@ -1,15 +1,10 @@
 const MAP_RESOLVER_URL =
     "https://pinkplanner-map-resolver.hanouo-607.workers.dev/";
-// ===== ♡ BTS 打卡點備用座標 =====
-// Cloudflare 無法連線時，也能顯示已確認的地點
 
-const BTS_FALLBACK_COORDS = {
-    "542": [22.6208818, 120.2806123],
-    "545": [22.665173, 120.302745],
-    "88": [22.6644019, 120.3023508],
+    // ===== ♡ BTS 打卡點備用座標 =====
+// 測試座標已清除
+const BTS_FALLBACK_COORDS = {};
 
-    "LOVE FROM TAIWAN｜泰亨看板": [22.662945459073814, 120.30337518465576]
-};
 // ===== ♡ 全站共用編輯模式 =====
 let globalEditMode = false;
 
