@@ -2465,12 +2465,6 @@ if (cached) {
 
 if (!response.ok) {
     console.warn("地圖網址解析失敗：", response.status);
-
-    alert(
-        "♡ BTS 網址解析服務錯誤\n" +
-        "HTTP 狀態碼：" + response.status
-    );
-
     return null;
 }
 
@@ -2482,6 +2476,7 @@ if (
     !Number.isFinite(result.longitude)
 ) {
     console.warn("♡ BTS 座標解析結果：", result);
+    return null;
 
     alert(
         "♡ BTS 座標解析失敗\n" +
@@ -2509,13 +2504,6 @@ if (
 
 } catch (error) {
     console.warn("無法取得地圖座標：", error);
-
-    alert(
-        "♡ Google Maps 網址解析發生例外\n" +
-        "錯誤名稱：" + (error.name || "未知") + "\n" +
-        "錯誤訊息：" + (error.message || String(error))
-    );
-
     return null;
 }
 }
