@@ -2123,11 +2123,16 @@ try {
         "pinkPlannerChecklists",
         JSON.stringify(checklists)
     );
+
 } catch (error) {
+    console.error("♡ 打卡清單儲存失敗：", error);
+
     alert(
-        "♡ 圖片或資料太大，儲存失敗！\n" +
-        "請先備份資料，並嘗試使用較小的圖片。"
+        "♡ 打卡點儲存失敗！\n" +
+        "錯誤名稱：" + error.name + "\n" +
+        "錯誤訊息：" + error.message
     );
+
 
     // 恢復上一次成功儲存的資料
     checklists = JSON.parse(
