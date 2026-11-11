@@ -206,6 +206,36 @@
     id="checklistItemMapUrl"
     placeholder="貼上 Google Maps 網址"
 >
+
+
+<!-- ===== ♡ BTS 打卡點備用座標 ===== -->
+<div class="checklist-coordinate-fields">
+
+<p class="coordinate-hint-small">♡ 備用座標（選填）</p>
+<small class="coordinate-hint-small">Google Maps 無法自動定位時才需要填寫。</small>
+
+
+    <label for="checklistItemLatitude">緯度 Latitude</label>
+    <input
+        type="number"
+        id="checklistItemLatitude"
+        placeholder="例如：22.670529"
+        step="any"
+        min="-90"
+        max="90"
+    >
+
+    <label for="checklistItemLongitude">經度 Longitude</label>
+    <input
+        type="number"
+        id="checklistItemLongitude"
+        placeholder="例如：120.302046"
+        step="any"
+        min="-180"
+        max="180"
+    >
+</div>
+
 <!-- ===== ♡ 打卡點店家／社群平台 ===== -->
 
 <label for="checklistItemShopPlatform">店家／社群平台</label>
@@ -391,6 +421,6 @@
 </body>
 <!-- ===== ♡ Leaflet 地圖功能 ===== -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="script.js?v=50"></script>
+<script src="script.js?v=51"></script>
 </html>
 

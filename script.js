@@ -1749,6 +1749,14 @@ document.getElementById("checklistTransportRoute").value =
 document.getElementById("checklistItemMapUrl").value =
     item.mapUrl || "";
 
+ // ===== ♡ 編輯時帶入已儲存的備用座標 =====
+document.getElementById("checklistItemLatitude").value =
+    item.latitude ?? "";
+
+document.getElementById("checklistItemLongitude").value =
+    item.longitude ?? "";
+
+
     // ===== ♡ 編輯時帶入社群平台與網址 =====
 document.getElementById("checklistItemShopPlatform").value =
     item.shopPlatform || "instagram";
@@ -1942,6 +1950,41 @@ const transportRoute = document.getElementById("checklistTransportRoute").value.
 const note = document.getElementById("checklistItemNote").value.trim();
 // ===== ♡ 取得打卡點 Google Maps 網址 =====
 const mapUrl = document.getElementById("checklistItemMapUrl").value.trim();
+
+ // ===== ♡ 讀取打卡點備用座標 =====
+const latitudeText =
+    document.getElementById("checklistItemLatitude").value.trim();
+
+const longitudeText =
+    document.getElementById("checklistItemLongitude").value.trim();
+
+// 沒填座標時使用 null，交給 Google Maps 自動解析
+const latitude = latitudeText === "" ? null : Number(latitudeText);
+const longitude = longitudeText === "" ? null : Number(longitudeText);
+
+// 座標必須兩個一起填寫
+if ((latitudeText === "") !== (longitudeText === "")) {
+    alert("♡ 請同時填寫緯度和經度，或兩個都留空！");
+    return;
+}
+
+// 檢查座標是否有效
+if (
+    (latitude !== null && (
+        !Number.isFinite(latitude) ||
+        latitude < -90 ||
+        latitude > 90
+    )) ||
+    (longitude !== null && (
+        !Number.isFinite(longitude) ||
+        longitude < -180 ||
+        longitude > 180
+    ))
+) {
+    alert("♡ 座標格式不正確，請確認經緯度！");
+    return;
+}
+
 // ===== ♡ 取得打卡點社群平台與網址 =====
 const shopPlatform = document.getElementById("checklistItemShopPlatform").value;
 const shopInfo = document.getElementById("checklistItemShopInfo").value.trim();
@@ -1996,6 +2039,11 @@ existingItem.transportTo = transportTo;
 existingItem.transportRoute = transportRoute;
 existingItem.note = note;
 existingItem.mapUrl = mapUrl;
+
+ // ===== ♡ 儲存編輯後的備用座標 =====
+existingItem.latitude = latitude;
+existingItem.longitude = longitude;
+
 existingItem.shopPlatform = shopPlatform;
 existingItem.shopInfo = shopInfo;
 // ===== ♡ 編輯打卡點照片：改存 IndexedDB =====
@@ -2044,7 +2092,11 @@ if (imageData !== null) {
         transportTo: transportTo,
         transportRoute: transportRoute,
         note: note,
+
         mapUrl: mapUrl,
+        latitude: latitude,
+        longitude: longitude,
+
         shopPlatform: shopPlatform,
         shopInfo: shopInfo,
         image: null,
@@ -2056,6 +2108,12 @@ if (imageData !== null) {
 
 // 清除編輯狀態
 window.editingChecklistItemId = null;
+
+
+ // ===== ♡ 新增打卡點時清空備用座標 =====
+document.getElementById("checklistItemLatitude").value = "";
+document.getElementById("checklistItemLongitude").value = "";
+
 
 
         // 儲存到瀏覽器
@@ -2082,8 +2140,16 @@ try {
         // 關閉視窗
         document.getElementById("checklistItemModal").style.display = "none";
 
-        renderChecklists();
-        alert("打卡點儲存成功 ♡");
+
+renderChecklists();
+
+// ♡ 儲存打卡點後，立即重新整理地圖標記
+if (checklistMap) {
+    initChecklistMap();
+}
+
+alert("打卡點儲存成功 ♡");
+
 
     });
 

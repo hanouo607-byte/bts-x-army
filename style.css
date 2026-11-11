@@ -2252,3 +2252,11 @@ outline: none;
 #armyLocationButton:hover {
     background: #8050B0;
 }
+
+
+/* ♡ 備用座標提示文字：縮小 50%＋灰色 */
+#checklistItemModal .coordinate-hint-small {
+    font-size: 50%;
+    color: #888888;
+    font-weight: normal;
+}
