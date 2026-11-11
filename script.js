@@ -2106,9 +2106,6 @@ if (imageData !== null) {
 
 }
 
-// 清除編輯狀態
-window.editingChecklistItemId = null;
-
 
  // ===== ♡ 新增打卡點時清空備用座標 =====
 document.getElementById("checklistItemLatitude").value = "";
@@ -2142,8 +2139,11 @@ try {
     return;
 }
 
-        // 關閉視窗
-        document.getElementById("checklistItemModal").style.display = "none";
+// ♡ 儲存成功後才清除編輯狀態
+window.editingChecklistItemId = null;
+
+// 關閉視窗
+document.getElementById("checklistItemModal").style.display = "none";
 
 
 renderChecklists();
@@ -2582,6 +2582,55 @@ if (
 }
 
 console.table(getChecklistMapItems());
+
+// ===== ♡ 打卡清單安全備份 =====
+(function () {
+    const backupButton = document.createElement("button");
+
+    backupButton.type = "button";
+    backupButton.textContent = "💾 備份打卡清單";
+
+    backupButton.style.cssText = `
+        display: block;
+        margin: 20px auto;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 20px;
+        background: #f5b8d6;
+        color: #713c5c;
+        font-weight: bold;
+        cursor: pointer;
+    `;
+
+    backupButton.addEventListener("click", function () {
+        const savedData = localStorage.getItem("pinkPlannerChecklists");
+
+        if (!savedData) {
+            alert("♡ 目前沒有可備份的打卡清單");
+            return;
+        }
+
+        const blob = new Blob([savedData], {
+            type: "application/json"
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "BTS-X-ARMY-checklists-backup.json";
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(function () {
+            URL.revokeObjectURL(url);
+        }, 10000);
+    });
+
+    document.body.appendChild(backupButton);
+})();
 
 // 網頁載入時顯示已儲存的清單
 renderChecklists();
