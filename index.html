@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BTS X ARMY ♡ 行程規劃</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- ===== ♡ Leaflet 地圖樣式 ===== -->
+    <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -55,8 +60,16 @@
     <button id="checklistTab" class="main-tab">
         ♡ 打卡清單
     </button>
+
+    <button id="mapTab" class="main-tab">
+    ♡ 地圖
+    </button>
 </div>
 
+<!-- ===== ♡ 地圖分頁內容 ===== -->
+<section id="mapSection" style="display: none;">
+    <div id="checklistMap"></div>
+</section>
 
 <!-- ===== 打卡清單分頁內容 ===== -->
 <section id="checklistSection" class="checklist-section" style="display: none;">
@@ -360,6 +373,8 @@
 
 
 </body>
+<!-- ===== ♡ Leaflet 地圖功能 ===== -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="script.js"></script>
 </html>
 

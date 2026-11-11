@@ -1,3 +1,6 @@
+const MAP_RESOLVER_URL =
+    "https://pinkplanner-map-resolver.hanouo-607.workers.dev/";
+
 // ===== ♡ 全站共用編輯模式 =====
 let globalEditMode = false;
 
@@ -678,38 +681,152 @@ function loadTripData() {
 }
 
 
-/* ===== PinkPlanner 主分頁切換 ===== */
+/* ===== ♡ PinkPlanner 地圖初始化 ===== */
 
+let checklistMap = null;
+
+function initChecklistMap() {
+
+    // 確認 Leaflet 已載入
+    if (typeof L === "undefined") {
+        console.error("Leaflet 尚未載入");
+        return;
+    }
+
+    // 第一次開啟時建立地圖
+    if (!checklistMap) {
+
+        checklistMap = L.map("checklistMap").setView(
+            [22.645, 120.29],
+            12
+        );
+
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(checklistMap);
+    }
+
+    // 更新地圖大小
+    checklistMap.invalidateSize();
+
+    // 移除舊的打卡標記，保留地圖底圖
+    checklistMap.eachLayer(function (layer) {
+        if (layer instanceof L.CircleMarker) {
+            checklistMap.removeLayer(layer);
+        }
+    });
+
+    // ===== ♡ 目前兩筆測試地點的座標 =====
+    const testLocations = {
+        "414": [22.665173, 120.302745],
+        "22245": [22.6208818, 120.2806123]
+    };
+
+    // 讀取打卡清單
+    const mapItems = getChecklistMapItems();
+
+    const markerPositions = [];
+
+    mapItems.forEach(function (item) {
+
+        const position = testLocations[item.name];
+
+        // 暫時跳過還沒有座標的地點
+        if (!position) return;
+
+        const markerColor = item.completed
+            ? "#9864C8"   // 已完成：紫色
+            : "#EAA1C5";  // 未完成：粉紅色
+
+        const marker = L.circleMarker(position, {
+            radius: 11,
+            color: markerColor,
+            fillColor: markerColor,
+            fillOpacity: 0.9,
+            weight: 2
+        });
+
+        marker.addTo(checklistMap);
+
+        // 點擊標記顯示打卡點名稱與狀態
+        const popup = document.createElement("div");
+
+        const nameText = document.createElement("strong");
+        nameText.textContent = item.name;
+
+        const statusText = document.createElement("div");
+        statusText.textContent = item.completed
+            ? "💜 已完成"
+            : "💗 未完成";
+
+        popup.appendChild(nameText);
+        popup.appendChild(statusText);
+
+        marker.bindPopup(popup);
+
+        markerPositions.push(position);
+
+    });
+
+    // 自動調整範圍，讓所有標記都看得到
+    if (markerPositions.length > 1) {
+
+        checklistMap.fitBounds(markerPositions, {
+            padding: [30, 30],
+            maxZoom: 15
+        });
+
+    } else if (markerPositions.length === 1) {
+
+        checklistMap.setView(markerPositions[0], 15);
+
+    }
+}
 
 /* ===== PinkPlanner 主分頁切換與記憶 ===== */
 
 const scheduleTab = document.getElementById("scheduleTab");
 const checklistTab = document.getElementById("checklistTab");
+const mapTab = document.getElementById("mapTab");
 
 const scheduleSection = document.querySelector(".schedule-section");
 const checklistSection = document.getElementById("checklistSection");
+const mapSection = document.getElementById("mapSection");
 
 // 切換分頁並儲存位置
 function switchMainTab(tabName) {
 
+    // 先隱藏三個分頁
+    scheduleSection.style.display = "none";
+    checklistSection.style.display = "none";
+    mapSection.style.display = "none";
+
+    // 移除三個分頁的選取狀態
+    scheduleTab.classList.remove("active");
+    checklistTab.classList.remove("active");
+    mapTab.classList.remove("active");
+
+    // 顯示指定分頁
     if (tabName === "checklist") {
 
-        scheduleSection.style.display = "none";
         checklistSection.style.display = "block";
-
-        scheduleTab.classList.remove("active");
         checklistTab.classList.add("active");
+
+    } else if (tabName === "map") {
+
+        mapSection.style.display = "block";
+        mapTab.classList.add("active");
 
     } else {
 
+        tabName = "schedule";
         scheduleSection.style.display = "block";
-        checklistSection.style.display = "none";
-
         scheduleTab.classList.add("active");
-        checklistTab.classList.remove("active");
 
     }
 
+    // 記住目前分頁
     localStorage.setItem("pinkPlannerActiveTab", tabName);
 }
 
@@ -723,11 +840,24 @@ checklistTab.addEventListener("click", function () {
     switchMainTab("checklist");
 });
 
+// 點擊地圖
+mapTab.addEventListener("click", function () {
+    switchMainTab("map");
+
+    setTimeout(function () {
+        initChecklistMap();
+    }, 100);
+});
+
 // 網頁載入時恢復上次的主分頁
 const savedMainTab =
     localStorage.getItem("pinkPlannerActiveTab") || "schedule";
 
 switchMainTab(savedMainTab);
+
+if (savedMainTab === "map") {
+    initChecklistMap();
+}
 
 
 /* ===== 打卡清單視窗開啟與關閉 ===== */
@@ -2011,6 +2141,92 @@ document.getElementById("deleteChecklistImageButton")
         document.getElementById("checklistExistingImage").removeAttribute("src");
     });
 
+    /* ===== ♡ 地圖讀取打卡清單資料 ===== */
+
+function getChecklistMapItems() {
+
+    const mapItems = [];
+
+    checklists.forEach(function (checklist) {
+
+        checklist.items.forEach(function (item) {
+
+            // 只讀取有 Google Maps 網址的打卡點
+            if (!item.mapUrl) return;
+
+            mapItems.push({
+                id: item.id,
+                name: item.name,
+                mapUrl: item.mapUrl,
+                completed: item.completed === true
+            });
+
+        });
+
+    });
+
+    return mapItems;
+}
+
+// ===== ♡ Google Maps 短網址自動解析 =====
+
+
+async function resolveChecklistMapUrl(mapUrl) {
+
+    if (!mapUrl) return null;
+
+    // 先檢查是否已經解析過，避免重複請求
+    const cacheKey = "pinkPlannerMapCoords:" + mapUrl;
+
+    try {
+        const cached = localStorage.getItem(cacheKey);
+
+        if (cached) {
+            return JSON.parse(cached);
+        }
+
+        const requestUrl =
+            MAP_RESOLVER_URL +
+            "?url=" +
+            encodeURIComponent(mapUrl);
+
+        const response = await fetch(requestUrl);
+
+        if (!response.ok) {
+            console.warn("地圖網址解析失敗：", response.status);
+            return null;
+        }
+
+        const result = await response.json();
+
+        if (
+            result.success !== true ||
+            !Number.isFinite(result.latitude) ||
+            !Number.isFinite(result.longitude)
+        ) {
+            return null;
+        }
+
+        const coords = [
+            result.latitude,
+            result.longitude
+        ];
+
+        // 只儲存成功解析的座標
+        localStorage.setItem(
+            cacheKey,
+            JSON.stringify(coords)
+        );
+
+        return coords;
+
+    } catch (error) {
+        console.warn("無法取得地圖座標：", error);
+        return null;
+    }
+}
+
+console.table(getChecklistMapItems());
 
 // 網頁載入時顯示已儲存的清單
 renderChecklists();
