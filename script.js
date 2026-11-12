@@ -2768,6 +2768,215 @@ console.table(getChecklistMapItems());
 })();
 
 
+/* ===== ♡ BTS X ARMY 完整還原（含照片） ===== */
+(function () {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "📥 完整還原（含照片）";
+
+    button.style.cssText = `
+        display: block;
+        margin: 12px auto 30px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 20px;
+        background: #f5c7e4;
+        color: #713c5c;
+        font-weight: bold;
+        cursor: pointer;
+    `;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.style.display = "none";
+
+    button.addEventListener("click", function () {
+        input.value = "";
+        input.click();
+    });
+
+    input.addEventListener("change", async function () {
+        const file = input.files[0];
+        if (!file) return;
+
+        button.disabled = true;
+        button.textContent = "♡ 正在檢查備份...";
+
+        let db = null;
+
+        try {
+            const backup = JSON.parse(await file.text());
+
+            // 先確認備份格式與主要資料
+            if (
+                backup.format !== "BTS-X-ARMY-FULL-BACKUP" ||
+                backup.version !== 1 ||
+                !backup.storage ||
+                typeof backup.storage !== "object" ||
+                Array.isArray(backup.storage) ||
+                !Array.isArray(backup.photos)
+            ) {
+                throw new Error("不是有效的 BTS X ARMY 完整備份");
+            }
+
+            for (const key of [
+                "pinkPlannerEvents",
+                "pinkPlannerChecklists",
+                "pinkPlannerTrip"
+            ]) {
+                if (typeof backup.storage[key] !== "string") {
+                    throw new Error("備份缺少必要資料：" + key);
+                }
+                JSON.parse(backup.storage[key]);
+            }
+
+            const photoIds = new Set();
+
+            for (const photo of backup.photos) {
+                if (
+                    !photo ||
+                    typeof photo.id !== "string" ||
+                    typeof photo.data !== "string" ||
+                    !photo.data.startsWith("data:image/") ||
+                    photoIds.has(photo.id)
+                ) {
+                    throw new Error("照片資料不完整或有重複 ID");
+                }
+                photoIds.add(photo.id);
+            }
+
+            // 確認所有引用的照片都有備份
+            const groups = JSON.parse(
+                backup.storage.pinkPlannerChecklists
+            );
+
+            if (!Array.isArray(groups)) {
+                throw new Error("打卡清單格式不正確");
+            }
+
+            for (const group of groups) {
+                if (!Array.isArray(group.items)) {
+                    throw new Error("打卡清單項目格式不正確");
+                }
+
+                for (const item of group.items) {
+                    if (
+                        item.imageId != null &&
+                        !photoIds.has(String(item.imageId)) &&
+                        !item.image
+                    ) {
+                        throw new Error(
+                            "缺少打卡點照片：" + item.name
+                        );
+                    }
+                }
+            }
+
+            const confirmed = confirm(
+                "♡ 備份檢查通過！\n\n" +
+                "照片：" + backup.photos.length + " 張\n" +
+                "打卡清單：" + groups.length + " 組\n\n" +
+                "還原會覆蓋目前網站的行程、清單及設定。\n" +
+                "請確認目前使用的是「新圖示」，不是舊圖示。\n\n" +
+                "確定要繼續嗎？"
+            );
+
+            if (!confirmed) return;
+
+            button.textContent = "♡ 正在還原照片...";
+
+            // 先還原照片，不清空既有資料庫
+            db = await openPinkPlannerImageDB();
+
+            await new Promise(function (resolve, reject) {
+                const transaction = db.transaction("photos", "readwrite");
+                const store = transaction.objectStore("photos");
+
+                for (const photo of backup.photos) {
+                    store.put(photo.data, photo.id);
+                }
+
+                transaction.oncomplete = resolve;
+
+                transaction.onerror = function () {
+                    reject(transaction.error);
+                };
+
+                transaction.onabort = function () {
+                    reject(
+                        transaction.error ||
+                        new Error("照片還原中止")
+                    );
+                };
+            });
+
+            db.close();
+            db = null;
+
+            button.textContent = "♡ 正在還原行程與清單...";
+
+            // 儲存寫入前的原始資料，以便失敗時回復
+            const previousStorage = {};
+
+            for (const key of Object.keys(backup.storage)) {
+                previousStorage[key] = localStorage.getItem(key);
+            }
+
+            try {
+                for (const [key, value] of Object.entries(backup.storage)) {
+                    if (typeof value !== "string") {
+                        throw new Error("儲存資料格式不正確：" + key);
+                    }
+
+                    localStorage.setItem(key, value);
+                }
+            } catch (error) {
+                // localStorage 寫入失敗時回復原始資料
+                for (const [key, value] of Object.entries(previousStorage)) {
+                    try {
+                        if (value === null) {
+                            localStorage.removeItem(key);
+                        } else {
+                            localStorage.setItem(key, value);
+                        }
+                    } catch (restoreError) {
+                        console.error("回復資料失敗：", restoreError);
+                    }
+                }
+
+                throw error;
+            }
+
+            alert(
+                "♡ 完整還原完成！\n" +
+                "照片：" + backup.photos.length + " 張\n\n" +
+                "按下確定後重新載入網站。"
+            );
+
+            location.reload();
+
+        } catch (error) {
+            console.error("完整還原失敗：", error);
+            alert(
+                "♡ 完整還原失敗：\n" +
+                error.message +
+                "\n\n請保留舊圖示及備份檔案。"
+            );
+
+        } finally {
+            if (db) db.close();
+            button.disabled = false;
+            button.textContent = "📥 完整還原（含照片）";
+        }
+    });
+
+    document.body.appendChild(input);
+    document.body.appendChild(button);
+})();
+
+
+
 // 網頁載入時顯示已儲存的清單
 renderChecklists();
 
