@@ -2748,8 +2748,7 @@ console.table(getChecklistMapItems());
             alert(
                 "♡ 備份檔案已產生！\n" +
                 "IndexedDB 照片：" + photos.length + " 張\n\n" +
-                "請確認 iPhone「檔案」App 中有備份檔案。\n" +
-                "確認前不要刪除舊圖示。"
+                "請確認 iPhone「檔案」App 中有備份檔案。\n"
             );
 
         } catch (error) {
@@ -2878,7 +2877,6 @@ console.table(getChecklistMapItems());
                 "照片：" + backup.photos.length + " 張\n" +
                 "打卡清單：" + groups.length + " 組\n\n" +
                 "還原會覆蓋目前網站的行程、清單及設定。\n" +
-                "請確認目前使用的是「新圖示」，不是舊圖示。\n\n" +
                 "確定要繼續嗎？"
             );
 
@@ -2974,6 +2972,90 @@ console.table(getChecklistMapItems());
     document.body.appendChild(input);
     document.body.appendChild(button);
 })();
+
+
+/* ===== ♡ 三個備份按鈕並排縮小 ===== */
+(function () {
+    const buttons = Array.from(
+        document.querySelectorAll("body > button")
+    );
+
+    const backupButton = buttons.find(button =>
+        button.textContent.includes("備份打卡清單")
+    );
+
+    const fullBackupButton = buttons.find(button =>
+        button.textContent.includes("完整備份")
+    );
+
+    const restoreButton = buttons.find(button =>
+        button.textContent.includes("完整還原")
+    );
+
+    if (!backupButton || !fullBackupButton || !restoreButton) {
+        return;
+    }
+
+    // 建立橫向排列容器
+    const row = document.createElement("div");
+    row.className = "backup-buttons-row";
+
+    row.style.cssText = `
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: stretch;
+        gap: 8px;
+        width: 100%;
+        max-width: 480px;
+        margin: 18px auto 25px;
+        box-sizing: border-box;
+    `;
+
+    // 放入三個原本的按鈕，保留原本功能
+    [backupButton, fullBackupButton, restoreButton]
+        .forEach(function (button) {
+
+            button.style.cssText = `
+                display: flex;
+                flex: 1 1 0;
+                min-width: 0;
+                align-items: center;
+                justify-content: center;
+                padding: 10px 4px;
+                margin: 0;
+                border: none;
+                border-radius: 16px;
+                font-size: 11px;
+                font-weight: bold;
+                line-height: 1.4;
+                text-align: center;
+                white-space: nowrap;
+                cursor: pointer;
+            `;
+
+            row.appendChild(button);
+        });
+
+    // 保留原本粉嫩配色
+    backupButton.style.background = "#f5b8d6";
+    backupButton.style.color = "#713c5c";
+
+    fullBackupButton.style.background = "#d9b8f5";
+    fullBackupButton.style.color = "#563477";
+
+    restoreButton.style.background = "#f5c7e4";
+    restoreButton.style.color = "#713c5c";
+
+    // 簡化畫面文字，功能不變
+    backupButton.textContent = "💾 備份清單";
+    fullBackupButton.textContent = "📦 完整備份";
+    restoreButton.textContent = "📥 完整還原";
+
+    // 加入網頁
+    document.body.appendChild(row);
+})();
+
 
 
 

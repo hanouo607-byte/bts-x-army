@@ -2236,7 +2236,7 @@ outline: none;
     height: 28px;
     padding: 0;
 
-    background: #9864C8;
+    background: #F5A6D5;
     color: white;
     border: none;
     border-radius: 8px;
@@ -2250,7 +2250,7 @@ outline: none;
 }
 
 #armyLocationButton:hover {
-    background: #8050B0;
+    background: #E88DBF;
 }
 
 
