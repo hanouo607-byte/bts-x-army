@@ -2632,7 +2632,7 @@ console.table(getChecklistMapItems());
 (function () {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = "📦 完整備份（含照片）";
+    button.textContent = "📦 完整備份";
 
     button.style.cssText = `
         display: block;
@@ -2759,7 +2759,7 @@ console.table(getChecklistMapItems());
             if (db) db.close();
 
             button.disabled = false;
-            button.textContent = "📦 完整備份（含照片）";
+            button.textContent = "📦 完整備份";
         }
     });
 
@@ -2771,7 +2771,7 @@ console.table(getChecklistMapItems());
 (function () {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = "📥 完整還原（含照片）";
+    button.textContent = "📥 完整還原";
 
     button.style.cssText = `
         display: block;
@@ -2806,6 +2806,69 @@ console.table(getChecklistMapItems());
 
         try {
             const backup = JSON.parse(await file.text());
+
+
+            // ===== ♡ 支援單獨還原打卡清單 =====
+            if (Array.isArray(backup)) {
+
+                // 確認清單資料格式
+                const valid = backup.every(function (group) {
+                    return (
+                        group &&
+                        typeof group === "object" &&
+                        typeof group.name === "string" &&
+                        Array.isArray(group.items) &&
+                        group.items.every(function (item) {
+                            return item &&
+                                typeof item === "object" &&
+                                typeof item.name === "string";
+                        })
+                    );
+                });
+
+                if (!valid) {
+                    throw new Error("打卡清單備份格式不正確");
+                }
+
+                // 檢查是否引用 IndexedDB 照片
+                const photoReferences = backup.reduce(function (count, group) {
+                    return count + group.items.filter(function (item) {
+                        return item.imageId != null && !item.image;
+                    }).length;
+                }, 0);
+
+                const confirmed = confirm(
+                    "♡ 偵測到打卡清單備份！\n\n" +
+                    "清單數量：" + backup.length + " 組\n\n" +
+                    "將覆蓋目前的打卡清單。\n" +
+                    "每日行程、旅遊資料及現有照片資料庫不會被清除。\n\n" +
+                    (photoReferences > 0
+                        ? "提醒：有 " + photoReferences +
+                          " 個打卡點引用獨立儲存的照片，" +
+                          "此備份不包含照片本體。\n\n"
+                        : "") +
+                    "確定要還原嗎？"
+                );
+
+                if (!confirmed) return;
+
+                // 僅更新打卡清單
+                localStorage.setItem(
+                    "pinkPlannerChecklists",
+                    JSON.stringify(backup)
+                );
+
+                alert(
+                    "♡ 打卡清單還原成功！\n\n" +
+                    "已還原 " + backup.length + " 組清單。\n" +
+                    "按下確定後重新載入網站。"
+                );
+
+                location.reload();
+                return;
+            }
+            // ===== ♡ 單獨清單還原結束 =====
+
 
             // 先確認備份格式與主要資料
             if (
@@ -2965,7 +3028,7 @@ console.table(getChecklistMapItems());
         } finally {
             if (db) db.close();
             button.disabled = false;
-            button.textContent = "📥 完整還原（含照片）";
+            button.textContent = "📥 完整還原";
         }
     });
 
