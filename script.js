@@ -2627,6 +2627,147 @@ console.table(getChecklistMapItems());
     document.body.appendChild(backupButton);
 })();
 
+
+/* ===== ♡ BTS X ARMY 完整備份（含 IndexedDB 照片） ===== */
+(function () {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "📦 完整備份（含照片）";
+
+    button.style.cssText = `
+        display: block;
+        margin: 12px auto 24px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 20px;
+        background: #d9b8f5;
+        color: #563477;
+        font-weight: bold;
+        cursor: pointer;
+    `;
+
+    button.addEventListener("click", async function () {
+        button.disabled = true;
+        button.textContent = "♡ 正在備份，請稍候...";
+
+        let db = null;
+
+        try {
+            // 備份網站全部 localStorage 資料
+            const storage = {};
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                storage[key] = localStorage.getItem(key);
+            }
+
+            // 讀取 IndexedDB 的全部照片
+            db = await openPinkPlannerImageDB();
+
+            const photos = await new Promise(function (resolve, reject) {
+                const transaction = db.transaction("photos", "readonly");
+                const store = transaction.objectStore("photos");
+                const request = store.openCursor();
+                const result = [];
+
+                request.onsuccess = function () {
+                    const cursor = request.result;
+
+                    if (cursor) {
+                        if (typeof cursor.value !== "string") {
+                            reject(new Error("照片資料格式不正確"));
+                            return;
+                        }
+
+                        result.push({
+                            id: String(cursor.key),
+                            data: cursor.value
+                        });
+
+                        cursor.continue();
+                    }
+                };
+
+                request.onerror = function () {
+                    reject(request.error);
+                };
+
+                transaction.oncomplete = function () {
+                    resolve(result);
+                };
+
+                transaction.onerror = function () {
+                    reject(transaction.error);
+                };
+
+                transaction.onabort = function () {
+                    reject(transaction.error || new Error("照片讀取中止"));
+                };
+            });
+
+            db.close();
+            db = null;
+
+            const backup = {
+                format: "BTS-X-ARMY-FULL-BACKUP",
+                version: 1,
+                createdAt: new Date().toISOString(),
+                storage: storage,
+                photos: photos
+            };
+
+            // 檢查備份內容能正常轉換成 JSON
+            const json = JSON.stringify(backup);
+            const verified = JSON.parse(json);
+
+            if (
+                verified.format !== "BTS-X-ARMY-FULL-BACKUP" ||
+                verified.photos.length !== photos.length
+            ) {
+                throw new Error("備份驗證失敗");
+            }
+
+            const blob = new Blob([json], {
+                type: "application/json"
+            });
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = "BTS-X-ARMY-FULL-BACKUP.json";
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            setTimeout(function () {
+                URL.revokeObjectURL(url);
+            }, 60000);
+
+            alert(
+                "♡ 備份檔案已產生！\n" +
+                "IndexedDB 照片：" + photos.length + " 張\n\n" +
+                "請確認 iPhone「檔案」App 中有備份檔案。\n" +
+                "確認前不要刪除舊圖示。"
+            );
+
+        } catch (error) {
+            console.error("完整備份失敗：", error);
+            alert("♡ 完整備份失敗：" + error.message);
+
+        } finally {
+            if (db) db.close();
+
+            button.disabled = false;
+            button.textContent = "📦 完整備份（含照片）";
+        }
+    });
+
+    document.body.appendChild(button);
+})();
+
+
 // 網頁載入時顯示已儲存的清單
 renderChecklists();
 
